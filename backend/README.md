@@ -10,6 +10,12 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
+## Structure
+
+- `app/core` shared infrastructure (db connection)
+- `app/domains/profiles` profile domain (models/repository/service/schemas/router)
+- `app/api` shared API router + health route
+
 ## Endpoints
 
 - `GET /api/health`
@@ -18,5 +24,5 @@ uvicorn app.main:app --reload --port 8000
 
 ## Notes
 
-- Storage is in-memory for now (resets on restart).
-- Case/message endpoints are intentionally removed for now.
+- Uses SQLite file storage at `backend/sichi.db`.
+- No seed profiles are inserted on startup.

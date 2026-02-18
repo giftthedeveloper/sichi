@@ -10,7 +10,3 @@ class ProfileCreateRequest(BaseModel):
 class ProfileResponse(BaseModel):
     id: str
     name: str
-
-
-class HealthResponse(BaseModel):
-    status: str

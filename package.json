@@ -5,7 +5,8 @@
   "type": "module",
   "packageManager": "bun@1.2.4",
   "scripts": {
-    "start": "bun install && bun run dev",
+    "start": "bun run start:all",
+    "start:all": "bun install && ./scripts/dev.sh",
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",

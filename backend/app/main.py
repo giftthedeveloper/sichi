@@ -3,9 +3,16 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import router
+from app.api.router import api_router
+from app.domains.profiles.repository import init_profiles_table
 
 app = FastAPI(title="sichi-api", version="0.1.0")
+
+
+@app.on_event("startup")
+def startup() -> None:
+    init_profiles_table()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,4 +22,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
+app.include_router(api_router)
