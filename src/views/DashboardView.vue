@@ -5,6 +5,12 @@
       <span class="orb orb-two"></span>
       <span class="orb orb-three"></span>
     </div>
+    <div class="login-row">
+      <button type="button" class="picker-btn" @click="isPickerOpen = true">
+        Select demo user
+      </button>
+      <p v-if="selectedUser" class="user-chip">{{ selectedUser.name }}</p>
+    </div>
     <h1>How can I help?</h1>
     <form class="input-wrap" @submit.prevent="submitStarter">
       <label class="field">
@@ -14,16 +20,84 @@
           type="text"
           :placeholder="animatedPlaceholder"
         />
+        <button type="submit" class="send-icon" aria-label="Send message">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4 20L21 12L4 4L4 10L15 12L4 14L4 20Z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
       </label>
-      <button type="submit" aria-label="Send message">Send</button>
     </form>
+    <div v-if="isPickerOpen" class="overlay" @click.self="isPickerOpen = false">
+      <section class="picker-modal">
+        <div class="picker-head">
+          <h2>Choose a demo profile</h2>
+          <button type="button" class="close-btn" @click="isPickerOpen = false">X</button>
+        </div>
+        <label class="search-box">
+          <span class="sr-only">Search profile</span>
+          <input
+            v-model="profileQuery"
+            type="text"
+            placeholder="Search your name"
+          />
+        </label>
+        <button
+          v-if="canAddQueryUser"
+          type="button"
+          class="add-query-btn"
+          @click="addFromQuery"
+        >
+          + Add "{{ profileQuery.trim() }}"
+        </button>
+        <ul class="user-list">
+          <li v-if="!profileQuery.trim()" class="empty-state">
+            Start typing your name to find profile.
+          </li>
+          <li v-for="user in filteredUsers" :key="user.id">
+            <button type="button" class="user-card" @click="selectUser(user.id)">
+              <span class="avatar">{{ avatarLabel(user.name) }}</span>
+              <span class="identity"><strong>{{ user.name }}</strong></span>
+              <span class="use-tag">+ Use</span>
+            </button>
+          </li>
+          <li v-if="profileQuery.trim() && filteredUsers.length === 0" class="empty-state">
+            No profile found. Use the add button above.
+          </li>
+        </ul>
+      </section>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+
+interface DemoUser {
+  id: string;
+  name: string;
+}
 
 const draft = ref('');
+const isPickerOpen = ref(true);
+const selectedUser = ref<DemoUser | null>(null);
+const profileQuery = ref('');
+const demoUsers = ref<DemoUser[]>([
+  {
+    id: 'u-1',
+    name: 'Amaka Eze'
+  },
+  {
+    id: 'u-2',
+    name: 'Tosin Akin'
+  },
+  {
+    id: 'u-3',
+    name: 'Sade Bello'
+  }
+]);
 const placeholderHints = [
   'I sent N25,000 since morning and it is still pending.',
   'I got debit alert but the receiver did not get the money.',
@@ -72,10 +146,52 @@ onBeforeUnmount(() => {
 });
 
 const submitStarter = (): void => {
-  if (!draft.value.trim()) return;
+  if (!selectedUser.value || !draft.value.trim()) return;
   // Screen 1 is mock-only for now, so submission clears the field.
   draft.value = '';
+};
+
+const selectUser = (userId: string): void => {
+  const picked = demoUsers.value.find((user) => user.id === userId);
+  if (!picked) return;
+  selectedUser.value = picked;
+  isPickerOpen.value = false;
+  profileQuery.value = '';
+};
+
+const avatarLabel = (name: string): string => {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase();
+};
+
+const normalized = (value: string): string => value.trim().toLowerCase();
+
+const filteredUsers = computed(() => {
+  const term = normalized(profileQuery.value);
+  if (!term) return [];
+  return demoUsers.value.filter((user) => normalized(user.name).includes(term));
+});
+
+const canAddQueryUser = computed(() => {
+  const term = normalized(profileQuery.value);
+  if (!term) return false;
+  return !demoUsers.value.some((user) => normalized(user.name) === term);
+});
+
+const addFromQuery = (): void => {
+  const name = profileQuery.value.trim();
+  if (!name) return;
+  const user: DemoUser = { id: `u-${demoUsers.value.length + 1}`, name };
+  demoUsers.value.unshift(user);
+  selectedUser.value = user;
+  isPickerOpen.value = false;
+  profileQuery.value = '';
 };
 </script>
 
 <style scoped src="./DashboardView.css"></style>
+<style scoped src="./DashboardViewPicker.css"></style>

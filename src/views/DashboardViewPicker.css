@@ -1,0 +1,153 @@
+.login-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.picker-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-main);
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.user-chip {
+  margin: 0;
+  background: var(--accent-soft);
+  color: var(--accent-main);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(29 26 34 / 18%);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.picker-modal {
+  width: min(520px, 92vw);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.picker-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.close-btn {
+  border: 0;
+  background: #f4eef6;
+  color: var(--text-main);
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.search-box input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 14px;
+  font: inherit;
+}
+
+.search-box input:focus {
+  outline: 0;
+  border-color: var(--accent-main);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.add-query-btn {
+  justify-self: start;
+  border: 1px solid var(--accent-main);
+  background: #fff;
+  color: var(--accent-main);
+  border-radius: 999px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.empty-state {
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.user-card {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #f4e9f1;
+  color: var(--accent-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.identity {
+  display: grid;
+  gap: 2px;
+}
+
+.use-tag {
+  margin-left: auto;
+  background: var(--accent-soft);
+  color: var(--accent-main);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .login-row {
+    flex-wrap: wrap;
+  }
+}
