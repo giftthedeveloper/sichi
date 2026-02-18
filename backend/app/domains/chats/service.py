@@ -1,18 +1,20 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from app.domains.chats.models import Chat
 from app.domains.chats import repository
 
 HUMAN_TOKENS = ("human", "agent", "person", "staff")
 
 
-def get_or_create_chat(profile_id: str, cursor: int | None, limit: int):
+def get_or_create_chat(profile_id: str, cursor: Optional[int], limit: int):
     chat = repository.get_or_create_active_chat(profile_id)
     messages, next_cursor, has_more = repository.list_messages(chat.id, cursor=cursor, limit=limit)
     return chat, messages, next_cursor, has_more
 
 
-def get_chat_with_messages(chat_id: str, cursor: int | None, limit: int):
+def get_chat_with_messages(chat_id: str, cursor: Optional[int], limit: int):
     chat = repository.get_chat(chat_id)
     messages, next_cursor, has_more = repository.list_messages(chat_id, cursor=cursor, limit=limit)
     return chat, messages, next_cursor, has_more

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from app.domains.profiles.models import Profile
 from app.domains.profiles import repository
 
 
-def list_profiles(query: str | None) -> list[Profile]:
+def list_profiles(query: Optional[str]) -> list[Profile]:
     if not query:
         return []
     needle = query.strip()

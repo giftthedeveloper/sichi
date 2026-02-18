@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Literal
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -31,5 +32,5 @@ class ChatResponse(BaseModel):
     created_at: str
     updated_at: str
     messages: list[ChatMessageResponse]
-    next_cursor: int | None
+    next_cursor: Optional[int]
     has_more: bool

@@ -16,7 +16,7 @@
       <label class="field">
         <span class="sr-only">Conversation starter</span>
         <input v-model="draft" type="text" :placeholder="animatedPlaceholder" />
-        <button type="submit" class="send-icon" aria-label="Send message">
+        <button type="submit" class="send-icon" :disabled="isSubmittingIssue" aria-label="Send message">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L21 12L4 4L4 10L15 12L4 14L4 20Z" fill="currentColor" /></svg>
         </button>
       </label>
@@ -64,6 +64,7 @@ import { useChatSession } from '../composables/useChatSession';
 
 const draft = ref('');
 const isPickerOpen = ref(true);
+const isSubmittingIssue = ref(false);
 const router = useRouter();
 const { state: chatState, selectUserProfile, startCaseFromIssue } = useChatSession();
 const selectedUser = computed(() => chatState.activeUser);
@@ -119,11 +120,16 @@ onBeforeUnmount(() => {
   if (timerId) clearTimeout(timerId);
 });
 
-const submitStarter = (): void => {
+const submitStarter = async (): Promise<void> => {
   if (!selectedUser.value || !draft.value.trim()) return;
-  startCaseFromIssue(draft.value.trim());
-  draft.value = '';
-  router.push('/chat');
+  isSubmittingIssue.value = true;
+  try {
+    await startCaseFromIssue(draft.value.trim());
+    draft.value = '';
+    router.push('/chat');
+  } finally {
+    isSubmittingIssue.value = false;
+  }
 };
 
 const selectUser = (userId: string): void => {

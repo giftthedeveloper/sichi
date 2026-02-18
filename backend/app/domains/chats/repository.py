@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from typing import Optional, Tuple
 
 from fastapi import HTTPException
 
@@ -110,7 +111,9 @@ def update_chat_state(chat_id: str, status: str, detail_stage: int) -> None:
         )
 
 
-def list_messages(chat_id: str, cursor: int | None, limit: int) -> tuple[list[ChatMessage], int | None, bool]:
+def list_messages(
+    chat_id: str, cursor: Optional[int], limit: int
+) -> Tuple[list[ChatMessage], Optional[int], bool]:
     query = (
         "SELECT id, chat_id, sender, text, created_at FROM chat_messages "
         "WHERE chat_id = ? ORDER BY id DESC LIMIT ?"

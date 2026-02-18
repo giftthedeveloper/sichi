@@ -30,7 +30,7 @@
         <label class="field">
           <span class="sr-only">Type message</span>
           <input v-model="draft" type="text" :placeholder="inputPlaceholder" />
-          <button type="submit" class="send-icon" aria-label="Send">
+          <button type="submit" class="send-icon" :disabled="isSending" aria-label="Send">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 20L21 12L4 4L4 10L15 12L4 14L4 20Z" fill="currentColor" />
             </svg>
@@ -42,14 +42,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useChatSession } from '../composables/useChatSession';
 
 const router = useRouter();
 const draft = ref('');
-const { state: session, sendMessage } = useChatSession();
+const isSending = ref(false);
+const { state: session, sendMessage, ensureSessionForActiveUser } = useChatSession();
 
 const statusLabel = computed(() => {
   const status = session.activeCase?.status;
@@ -58,18 +59,30 @@ const statusLabel = computed(() => {
 });
 
 const inputPlaceholder = computed(() => {
-  if (session.detailStage === 0) return 'Enter transfer amount';
-  if (session.detailStage === 1) return 'Enter date and time';
-  if (session.detailStage === 2) return 'Enter transaction reference';
+  const stage = session.activeCase?.detailStage ?? 0;
+  if (stage === 0) return 'Enter transfer amount';
+  if (stage === 1) return 'Enter date and time';
+  if (stage === 2) return 'Enter transaction reference';
   return 'Type a follow-up or request human support';
 });
 
-const submitMessage = (): void => {
+const submitMessage = async (): Promise<void> => {
   const text = draft.value.trim();
   if (!text) return;
-  sendMessage(text);
-  draft.value = '';
+  isSending.value = true;
+  try {
+    await sendMessage(text);
+    draft.value = '';
+  } finally {
+    isSending.value = false;
+  }
 };
+
+onMounted(() => {
+  if (!session.activeCase && session.activeUser) {
+    void ensureSessionForActiveUser();
+  }
+});
 </script>
 
 <style scoped src="./ChatView.css"></style>

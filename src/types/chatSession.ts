@@ -5,13 +5,14 @@ export interface DemoProfile {
 
 export type ConversationSender = 'user' | 'bot';
 
-export type CaseStatus = 'gathering_info' | 'ready_to_resolve' | 'resolved' | 'escalated';
+export type CaseStatus = 'active' | 'ready_to_resolve' | 'resolved' | 'escalated';
 
 export interface CaseRecord {
   id: string;
-  issue: string;
   status: CaseStatus;
+  detailStage: 0 | 1 | 2 | 3;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface ConversationMessage {

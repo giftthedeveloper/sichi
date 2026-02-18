@@ -2,28 +2,65 @@ import { computed, reactive } from 'vue';
 
 import type { CaseRecord, ConversationMessage, DemoProfile } from '../types/chatSession';
 
+interface ChatApiMessage {
+  id: number;
+  sender: 'user' | 'bot';
+  text: string;
+  created_at: string;
+}
+
+interface ChatApiResponse {
+  id: string;
+  profile_id: string;
+  status: 'active' | 'ready_to_resolve' | 'resolved' | 'escalated';
+  detail_stage: number;
+  created_at: string;
+  updated_at: string;
+  messages: ChatApiMessage[];
+}
+
 interface ChatState {
   activeUser: DemoProfile | null;
   activeCase: CaseRecord | null;
   messages: ConversationMessage[];
-  detailStage: 0 | 1 | 2 | 3;
 }
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000';
 
 const state = reactive<ChatState>({
   activeUser: null,
   activeCase: null,
-  messages: [],
-  detailStage: 0
+  messages: []
 });
 
-const timestamp = (): string =>
-  new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const toUiTime = (iso: string): string =>
+  new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-const appendMessage = (sender: 'user' | 'bot', text: string): void => {
-  state.messages.push({ id: crypto.randomUUID(), sender, text, time: timestamp() });
+const hydrateFromApi = (payload: ChatApiResponse): void => {
+  state.activeCase = {
+    id: payload.id,
+    status: payload.status,
+    detailStage: Math.max(0, Math.min(3, payload.detail_stage)) as 0 | 1 | 2 | 3,
+    createdAt: payload.created_at,
+    updatedAt: payload.updated_at
+  };
+  state.messages = payload.messages.map((message) => ({
+    id: String(message.id),
+    sender: message.sender,
+    text: message.text,
+    time: toUiTime(message.created_at)
+  }));
 };
 
-const humanKeywords = ['human', 'agent', 'person', 'staff'] as const;
+const postJson = async <T>(path: string, body: object): Promise<T> => {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!response.ok) throw new Error(`Request failed: ${path}`);
+  return (await response.json()) as T;
+};
 
 export function useChatSession() {
   const needsUser = computed(() => !state.activeUser);
@@ -32,66 +69,34 @@ export function useChatSession() {
     state.activeUser = profile;
   };
 
-  const startCaseFromIssue = (issue: string): void => {
+  const ensureSessionForActiveUser = async (): Promise<void> => {
     if (!state.activeUser) return;
-    const caseId = `SC-${Math.floor(Math.random() * 9000) + 1000}`;
-    state.activeCase = {
-      id: caseId,
-      issue,
-      status: 'gathering_info',
-      createdAt: timestamp()
-    };
-    state.messages = [];
-    state.detailStage = 0;
-    appendMessage('user', issue);
-    appendMessage('bot', 'I understand. Please share the transfer amount first.');
+    const data = await postJson<ChatApiResponse>('/api/chats/session', {
+      profile_id: state.activeUser.id
+    });
+    hydrateFromApi(data);
   };
 
-  const escalateToHuman = (): void => {
-    if (!state.activeCase) return;
-    state.activeCase.status = 'escalated';
-    appendMessage('bot', 'Done. I have moved this case to human support queue.');
+  const startCaseFromIssue = async (issue: string): Promise<void> => {
+    if (!state.activeUser || !issue.trim()) return;
+    await ensureSessionForActiveUser();
+    await sendMessage(issue.trim());
   };
 
-  const sendMessage = (text: string): void => {
+  const sendMessage = async (text: string): Promise<void> => {
     if (!state.activeCase || !text.trim()) return;
-    appendMessage('user', text);
-    if (humanKeywords.some((word) => text.toLowerCase().includes(word))) {
-      escalateToHuman();
-      return;
-    }
-    if (state.activeCase.status === 'escalated' || state.activeCase.status === 'resolved') {
-      appendMessage('bot', 'Your case is already completed. Start a new issue for another request.');
-      return;
-    }
-    if (state.detailStage === 0) {
-      state.detailStage = 1;
-      appendMessage('bot', 'Thanks. Please share transaction date and time.');
-      return;
-    }
-    if (state.detailStage === 1) {
-      state.detailStage = 2;
-      appendMessage('bot', 'Got it. Please provide transaction reference or recipient account.');
-      return;
-    }
-    if (state.detailStage === 2) {
-      state.detailStage = 3;
-      state.activeCase.status = 'ready_to_resolve';
-      appendMessage(
-        'bot',
-        `Case ${state.activeCase.id} is complete. I can attempt instant check now or escalate to human support.`
-      );
-      return;
-    }
-    appendMessage('bot', 'Reply with "human" if you want escalation, or continue for more help.');
+    const data = await postJson<ChatApiResponse>(`/api/chats/${state.activeCase.id}/messages`, {
+      text: text.trim()
+    });
+    hydrateFromApi(data);
   };
 
   return {
     state,
     needsUser,
     selectUserProfile,
+    ensureSessionForActiveUser,
     startCaseFromIssue,
-    sendMessage,
-    escalateToHuman
+    sendMessage
   };
 }
