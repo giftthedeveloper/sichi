@@ -6,14 +6,17 @@
       <span class="orb orb-three"></span>
     </div>
     <h1>How can I help?</h1>
-    <label class="input-wrap">
-      <span class="sr-only">Conversation starter</span>
-      <input
-        v-model="draft"
-        type="text"
-        :placeholder="animatedPlaceholder"
-      />
-    </label>
+    <form class="input-wrap" @submit.prevent="submitStarter">
+      <label class="field">
+        <span class="sr-only">Conversation starter</span>
+        <input
+          v-model="draft"
+          type="text"
+          :placeholder="animatedPlaceholder"
+        />
+      </label>
+      <button type="submit" aria-label="Send message">Send</button>
+    </form>
   </section>
 </template>
 
@@ -22,10 +25,12 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 const draft = ref('');
 const placeholderHints = [
-  'My transfer is pending for more than 24 hours.',
-  'I want to dispute a card charge.',
-  'Where is my bank-to-bank transfer?',
-  'I need a human support specialist.'
+  'I sent N25,000 since morning and it is still pending.',
+  'I got debit alert but the receiver did not get the money.',
+  'My account was debited twice for one POS payment.',
+  'I did transfer to wrong account number, please help me urgently.',
+  'Web payment failed but my account was debited.',
+  'Please check why my reversal has not dropped since yesterday.'
 ] as const;
 const animatedPlaceholder = ref('');
 
@@ -65,6 +70,12 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (timerId) clearTimeout(timerId);
 });
+
+const submitStarter = (): void => {
+  if (!draft.value.trim()) return;
+  // Screen 1 is mock-only for now, so submission clears the field.
+  draft.value = '';
+};
 </script>
 
 <style scoped src="./DashboardView.css"></style>
