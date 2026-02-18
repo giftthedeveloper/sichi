@@ -1,0 +1,37 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 72px;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  justify-content: center;
+  padding-top: 18px;
+}
+
+.mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--accent-main);
+  opacity: 0.5;
+}
+
+.content {
+  flex: 1;
+  padding: 22px;
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    width: 56px;
+    padding: 10px 7px;
+  }
+
+  .content {
+    padding: 14px;
+  }
+}

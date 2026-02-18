@@ -1,0 +1,28 @@
+:root {
+  --bg: #fcfafc;
+  --surface: #ffffff;
+  --text-main: #1d1a22;
+  --text-muted: #6c6475;
+  --border: #efe7f2;
+  --accent-main: #c0448a;
+  --accent-soft: #fbeaf4;
+  --font-main: 'Manrope', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top right, #fdf0f8 0%, var(--bg) 34%);
+  color: var(--text-main);
+  font-family: var(--font-main);
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}

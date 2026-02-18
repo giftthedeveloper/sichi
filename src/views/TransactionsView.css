@@ -1,0 +1,14 @@
+.transactions-view {
+  display: grid;
+  gap: 16px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+p {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+}

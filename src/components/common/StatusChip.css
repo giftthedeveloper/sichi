@@ -1,0 +1,35 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.tone-resolved_by_bot {
+  background: #e9f8f2;
+  color: #226d58;
+}
+
+.tone-awaiting_user {
+  background: #fff4dd;
+  color: #8a5f12;
+}
+
+.tone-escalated {
+  background: #fdecef;
+  color: #9e3050;
+}
+
+.tone-blocked {
+  background: #fbe4e4;
+  color: #8f2d2d;
+}
+
+.tone-triaged,
+.tone-new {
+  background: var(--accent-soft);
+  color: var(--accent-main);
+}
