@@ -6,6 +6,7 @@
       <span class="orb orb-three"></span>
     </div>
     <div class="login-row">
+      <button type="button" class="picker-btn" @click="router.push('/transactions')">Transactions</button>
       <button type="button" class="picker-btn" @click="isPickerOpen = true">
         {{ selectedUser ? 'Change demo user' : 'Select demo user' }}
       </button>

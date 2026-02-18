@@ -1,18 +1,26 @@
 <template>
   <section class="transactions-view">
-    <header>
-      <h2>Master Transactions</h2>
-      <p>All mock conversations and transaction support cases in one view.</p>
+    <header class="top">
+      <div>
+        <h2>Transactions</h2>
+        <p>Review all transactions in the system before creating a new one.</p>
+      </div>
+      <button type="button" class="new-btn" @click="router.push('/transactions/new')">
+        + New Transaction
+      </button>
     </header>
-    <TransactionTable :rows="state.transactions" />
+    <TransactionTable :rows="rows" />
   </section>
 </template>
 
 <script setup lang="ts">
-import TransactionTable from '../components/transactions/TransactionTable.vue';
-import { useMockSupport } from '../composables/useMockSupport';
+import { useRouter } from 'vue-router';
 
-const { state } = useMockSupport();
+import TransactionTable from '../components/transactions/TransactionTable.vue';
+import { useTransactionsMaster } from '../composables/useTransactionsMaster';
+
+const router = useRouter();
+const { rows } = useTransactionsMaster();
 </script>
 
 <style scoped src="./TransactionsView.css"></style>

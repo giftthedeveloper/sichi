@@ -11,7 +11,7 @@
         <strong>{{ session.activeCase.id }}</strong>
         <span>{{ statusLabel }}</span>
       </div>
-      <div class="spacer"></div>
+      <button type="button" class="ghost wide" @click="router.push('/transactions')">Transactions</button>
     </header>
 
     <section v-if="!session.activeCase" class="empty">

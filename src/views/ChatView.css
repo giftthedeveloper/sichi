@@ -26,9 +26,9 @@
   cursor: pointer;
 }
 
-.spacer {
-  width: 34px;
-  height: 34px;
+.ghost.wide {
+  width: auto;
+  padding: 0 12px;
 }
 
 .case-pill {

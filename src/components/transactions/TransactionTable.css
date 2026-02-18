@@ -23,3 +23,30 @@ th {
 .mono {
   font-family: var(--font-mono);
 }
+
+.state {
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+.state-processing {
+  background: #fbeaf4;
+  color: #a03670;
+}
+
+.state-review {
+  background: #fff4dd;
+  color: #8a5f12;
+}
+
+.state-resolved {
+  background: #e9f8f2;
+  color: #226d58;
+}
+
+.state-escalated {
+  background: #fdecef;
+  color: #9e3050;
+}

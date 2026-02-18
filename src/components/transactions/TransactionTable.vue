@@ -5,21 +5,21 @@
         <thead>
           <tr>
             <th>Transaction</th>
-            <th>Customer</th>
-            <th>Category</th>
+            <th>User</th>
+            <th>Type</th>
+            <th>Amount</th>
             <th>Status</th>
-            <th>Source</th>
-            <th>Updated</th>
+            <th>Created</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="row in rows" :key="row.id">
             <td class="mono">{{ row.id }}</td>
-            <td>{{ row.customerId }}</td>
-            <td>{{ row.category }}</td>
-            <td><StatusChip :status="row.status" /></td>
-            <td>{{ row.source }}</td>
-            <td class="mono">{{ row.updatedAt }}</td>
+            <td>{{ row.profileName }}</td>
+            <td>{{ row.type.replace('_', ' ') }}</td>
+            <td class="mono">{{ row.amount }}</td>
+            <td><span class="state" :class="`state-${row.state}`">{{ row.state }}</span></td>
+            <td class="mono">{{ row.createdAt }}</td>
           </tr>
         </tbody>
       </table>
@@ -29,10 +29,9 @@
 
 <script setup lang="ts">
 import PanelCard from '../common/PanelCard.vue';
-import StatusChip from '../common/StatusChip.vue';
-import type { Transaction } from '../../types/domain';
+import type { MasterTransaction } from '../../types/transactionsMaster';
 
-defineProps<{ rows: Transaction[] }>();
+defineProps<{ rows: MasterTransaction[] }>();
 </script>
 
 <style scoped src="./TransactionTable.css"></style>
