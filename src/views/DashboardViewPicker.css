@@ -1,8 +1,12 @@
 .login-row {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 3;
 }
 
 .picker-btn {
@@ -10,7 +14,8 @@
   background: #fff;
   color: var(--text-main);
   border-radius: 999px;
-  padding: 8px 12px;
+  padding: 7px 11px;
+  font-size: 0.82rem;
   cursor: pointer;
 }
 
@@ -19,8 +24,8 @@
   background: var(--accent-soft);
   color: var(--accent-main);
   border-radius: 999px;
-  padding: 8px 12px;
-  font-size: 0.84rem;
+  padding: 7px 11px;
+  font-size: 0.8rem;
 }
 
 .overlay {
@@ -148,6 +153,7 @@ h2 {
 
 @media (max-width: 760px) {
   .login-row {
-    flex-wrap: wrap;
+    top: 10px;
+    right: 12px;
   }
 }

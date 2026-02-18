@@ -7,7 +7,7 @@
     </div>
     <div class="login-row">
       <button type="button" class="picker-btn" @click="isPickerOpen = true">
-        Select demo user
+        {{ selectedUser ? 'Change demo user' : 'Select demo user' }}
       </button>
       <p v-if="selectedUser" class="user-chip">{{ selectedUser.name }}</p>
     </div>
@@ -15,18 +15,9 @@
     <form class="input-wrap" @submit.prevent="submitStarter">
       <label class="field">
         <span class="sr-only">Conversation starter</span>
-        <input
-          v-model="draft"
-          type="text"
-          :placeholder="animatedPlaceholder"
-        />
+        <input v-model="draft" type="text" :placeholder="animatedPlaceholder" />
         <button type="submit" class="send-icon" aria-label="Send message">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M4 20L21 12L4 4L4 10L15 12L4 14L4 20Z"
-              fill="currentColor"
-            />
-          </svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L21 12L4 4L4 10L15 12L4 14L4 20Z" fill="currentColor" /></svg>
         </button>
       </label>
     </form>
@@ -38,18 +29,9 @@
         </div>
         <label class="search-box">
           <span class="sr-only">Search profile</span>
-          <input
-            v-model="profileQuery"
-            type="text"
-            placeholder="Search your name"
-          />
+          <input v-model="profileQuery" type="text" placeholder="Search your name" />
         </label>
-        <button
-          v-if="canAddQueryUser"
-          type="button"
-          class="add-query-btn"
-          @click="addFromQuery"
-        >
+        <button v-if="canAddQueryUser" type="button" class="add-query-btn" @click="addFromQuery">
           + Add "{{ profileQuery.trim() }}"
         </button>
         <ul class="user-list">
@@ -74,6 +56,9 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+import { useChatSession } from '../composables/useChatSession';
 
 interface DemoUser {
   id: string;
@@ -82,8 +67,10 @@ interface DemoUser {
 
 const draft = ref('');
 const isPickerOpen = ref(true);
-const selectedUser = ref<DemoUser | null>(null);
 const profileQuery = ref('');
+const router = useRouter();
+const { state: chatState, selectUserProfile, startCaseFromIssue } = useChatSession();
+const selectedUser = computed(() => chatState.activeUser);
 const demoUsers = ref<DemoUser[]>([
   {
     id: 'u-1',
@@ -147,14 +134,15 @@ onBeforeUnmount(() => {
 
 const submitStarter = (): void => {
   if (!selectedUser.value || !draft.value.trim()) return;
-  // Screen 1 is mock-only for now, so submission clears the field.
+  startCaseFromIssue(draft.value.trim());
   draft.value = '';
+  router.push('/chat');
 };
 
 const selectUser = (userId: string): void => {
   const picked = demoUsers.value.find((user) => user.id === userId);
   if (!picked) return;
-  selectedUser.value = picked;
+  selectUserProfile(picked);
   isPickerOpen.value = false;
   profileQuery.value = '';
 };
@@ -187,7 +175,7 @@ const addFromQuery = (): void => {
   if (!name) return;
   const user: DemoUser = { id: `u-${demoUsers.value.length + 1}`, name };
   demoUsers.value.unshift(user);
-  selectedUser.value = user;
+  selectUserProfile(user);
   isPickerOpen.value = false;
   profileQuery.value = '';
 };

@@ -1,0 +1,164 @@
+.chat-page {
+  width: min(860px, 92vw);
+  margin: 6vh auto 0;
+  display: grid;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.chat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.ghost {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-main);
+  border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+}
+
+.spacer {
+  width: 34px;
+  height: 34px;
+}
+
+.case-pill {
+  background: var(--accent-soft);
+  color: var(--accent-main);
+  border-radius: 999px;
+  padding: 8px 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.empty {
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.empty h2,
+.empty p {
+  margin: 0;
+}
+
+.empty p {
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.chat-body {
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 12px;
+  height: 76vh;
+  position: relative;
+  z-index: 2;
+}
+
+.thread {
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+  overflow: auto;
+  align-content: start;
+}
+
+.bubble {
+  max-width: 75%;
+  width: fit-content;
+  border-radius: 14px;
+  padding: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.bubble p,
+.bubble small {
+  margin: 0;
+}
+
+.bubble small {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.bubble.user {
+  justify-self: end;
+  background: #f5e9f0;
+}
+
+.bubble.bot {
+  justify-self: start;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.field {
+  position: relative;
+  display: block;
+}
+
+.field input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 14px 56px 14px 16px;
+  font: inherit;
+}
+
+.field input:focus {
+  outline: 0;
+  border-color: var(--accent-main);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.send-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: var(--accent-main);
+  color: #fff;
+  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.send-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
