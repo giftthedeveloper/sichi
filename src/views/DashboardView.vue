@@ -31,21 +31,22 @@
           <span class="sr-only">Search profile</span>
           <input v-model="profileQuery" type="text" placeholder="Search your name" />
         </label>
-        <button v-if="canAddQueryUser" type="button" class="add-query-btn" @click="addFromQuery">
+        <button v-if="canAddQueryUser" type="button" class="add-query-btn" @click="addUserFromQuery">
           + Add "{{ profileQuery.trim() }}"
         </button>
         <ul class="user-list">
           <li v-if="!profileQuery.trim()" class="empty-state">
             Start typing your name to find profile.
           </li>
-          <li v-for="user in filteredUsers" :key="user.id">
+          <li v-if="profileQuery.trim() && isSearching" class="empty-state">Searching profiles...</li>
+          <li v-for="user in profiles" :key="user.id">
             <button type="button" class="user-card" @click="selectUser(user.id)">
               <span class="avatar">{{ avatarLabel(user.name) }}</span>
               <span class="identity"><strong>{{ user.name }}</strong></span>
               <span class="use-tag">+ Use</span>
             </button>
           </li>
-          <li v-if="profileQuery.trim() && filteredUsers.length === 0" class="empty-state">
+          <li v-if="profileQuery.trim() && !isSearching && profiles.length === 0" class="empty-state">
             No profile found. Use the add button above.
           </li>
         </ul>
@@ -58,33 +59,19 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { useProfilesApi } from '../composables/useProfilesApi';
 import { useChatSession } from '../composables/useChatSession';
-
-interface DemoUser {
-  id: string;
-  name: string;
-}
 
 const draft = ref('');
 const isPickerOpen = ref(true);
-const profileQuery = ref('');
 const router = useRouter();
 const { state: chatState, selectUserProfile, startCaseFromIssue } = useChatSession();
 const selectedUser = computed(() => chatState.activeUser);
-const demoUsers = ref<DemoUser[]>([
-  {
-    id: 'u-1',
-    name: 'Amaka Eze'
-  },
-  {
-    id: 'u-2',
-    name: 'Tosin Akin'
-  },
-  {
-    id: 'u-3',
-    name: 'Sade Bello'
-  }
-]);
+const { profileQuery, profiles, isSearching, canAddQueryUser, selectUserById, addFromQuery } =
+  useProfilesApi((profile) => {
+    selectUserProfile(profile);
+    isPickerOpen.value = false;
+  });
 const placeholderHints = [
   'I sent N25,000 since morning and it is still pending.',
   'I got debit alert but the receiver did not get the money.',
@@ -140,11 +127,8 @@ const submitStarter = (): void => {
 };
 
 const selectUser = (userId: string): void => {
-  const picked = demoUsers.value.find((user) => user.id === userId);
-  if (!picked) return;
-  selectUserProfile(picked);
+  selectUserById(userId);
   isPickerOpen.value = false;
-  profileQuery.value = '';
 };
 
 const avatarLabel = (name: string): string => {
@@ -156,28 +140,9 @@ const avatarLabel = (name: string): string => {
     .toUpperCase();
 };
 
-const normalized = (value: string): string => value.trim().toLowerCase();
-
-const filteredUsers = computed(() => {
-  const term = normalized(profileQuery.value);
-  if (!term) return [];
-  return demoUsers.value.filter((user) => normalized(user.name).includes(term));
-});
-
-const canAddQueryUser = computed(() => {
-  const term = normalized(profileQuery.value);
-  if (!term) return false;
-  return !demoUsers.value.some((user) => normalized(user.name) === term);
-});
-
-const addFromQuery = (): void => {
-  const name = profileQuery.value.trim();
-  if (!name) return;
-  const user: DemoUser = { id: `u-${demoUsers.value.length + 1}`, name };
-  demoUsers.value.unshift(user);
-  selectUserProfile(user);
+const addUserFromQuery = async (): Promise<void> => {
+  await addFromQuery();
   isPickerOpen.value = false;
-  profileQuery.value = '';
 };
 </script>
 
