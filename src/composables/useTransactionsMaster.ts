@@ -26,6 +26,7 @@ export function useTransactionsMaster() {
 
   const addTransaction = (input: {
     profileName: string;
+    accountLast4: string;
     type: MasterTransaction['type'];
     amount: string;
     state: MasterTransaction['state'];
@@ -34,10 +35,11 @@ export function useTransactionsMaster() {
     state.rows.unshift({
       id: nextId,
       profileName: input.profileName.trim(),
+      accountLast4: input.accountLast4.trim(),
       type: input.type,
       amount: input.amount.trim(),
       state: input.state,
-      createdAt: nowStamp()
+      transactionDate: nowStamp()
     });
   };
 

@@ -24,6 +24,22 @@ th {
   font-family: var(--font-mono);
 }
 
+.id-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.copy-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-main);
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
 .state {
   border-radius: 999px;
   padding: 4px 9px;
@@ -31,22 +47,12 @@ th {
   text-transform: capitalize;
 }
 
-.state-processing {
-  background: #fbeaf4;
-  color: #a03670;
-}
-
-.state-review {
-  background: #fff4dd;
-  color: #8a5f12;
-}
-
-.state-resolved {
+.state-successful {
   background: #e9f8f2;
   color: #226d58;
 }
 
-.state-escalated {
+.state-failed {
   background: #fdecef;
   color: #9e3050;
 }

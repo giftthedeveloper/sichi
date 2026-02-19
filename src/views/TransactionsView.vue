@@ -1,5 +1,10 @@
 <template>
   <section class="transactions-view">
+    <div class="ambient" aria-hidden="true">
+      <span class="orb orb-one"></span>
+      <span class="orb orb-two"></span>
+      <span class="orb orb-three"></span>
+    </div>
     <header class="top">
       <div>
         <h2>Transactions</h2>
@@ -9,7 +14,12 @@
         + New Transaction
       </button>
     </header>
-    <TransactionTable :rows="rows" />
+    <TransactionTable :rows="pagedRows" />
+    <footer class="pager">
+      <button type="button" class="pager-btn" :disabled="page === 1" @click="goPrev">Prev</button>
+      <p>Page {{ page }} of {{ totalPages }}</p>
+      <button type="button" class="pager-btn" :disabled="page === totalPages" @click="goNext">Next</button>
+    </footer>
     <div v-if="isCreateOpen" class="overlay" @click.self="isCreateOpen = false">
       <section class="create-modal">
         <header class="modal-head">
@@ -17,9 +27,12 @@
           <button type="button" class="ghost" @click="isCreateOpen = false">X</button>
         </header>
         <form class="modal-form" @submit.prevent="submitNewTransaction">
+          <p class="linked-user">
+            Profile: <strong>{{ activeProfileName || 'No demo user selected' }}</strong>
+          </p>
           <label>
-            Profile Name
-            <input v-model="form.profileName" type="text" placeholder="e.g. Chiamaka Obi" />
+            Account Number
+            <input v-model="form.accountNumber" type="text" placeholder="e.g. 0123456789" />
           </label>
           <label>
             Type
@@ -34,17 +47,15 @@
           <label>
             Status
             <select v-model="form.state">
-              <option value="processing">Processing</option>
-              <option value="review">Review</option>
-              <option value="resolved">Resolved</option>
-              <option value="escalated">Escalated</option>
+              <option value="successful">Successful</option>
+              <option value="failed">Failed</option>
             </select>
           </label>
           <label>
             Amount
             <input v-model="form.amount" type="text" placeholder="N25,000" />
           </label>
-          <button type="submit" class="new-btn">Create</button>
+          <button type="submit" class="new-btn" :disabled="!activeProfileName">Create</button>
         </form>
       </section>
     </div>
@@ -52,39 +63,60 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 import TransactionTable from '../components/transactions/TransactionTable.vue';
+import { useChatSession } from '../composables/useChatSession';
 import { useTransactionsMaster } from '../composables/useTransactionsMaster';
 import type { MasterTransaction } from '../types/transactionsMaster';
 
 const isCreateOpen = ref(false);
+const page = ref(1);
+const pageSize = 5;
+const { state: chatState } = useChatSession();
 const { rows, addTransaction } = useTransactionsMaster();
+const activeProfileName = computed(() => chatState.activeUser?.name ?? '');
+const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / pageSize)));
+const pagedRows = computed(() => {
+  const start = (page.value - 1) * pageSize;
+  return rows.value.slice(start, start + pageSize);
+});
 const form = reactive<{
-  profileName: string;
+  accountNumber: string;
   type: MasterTransaction['type'];
   state: MasterTransaction['state'];
   amount: string;
 }>({
-  profileName: '',
+  accountNumber: '',
   type: 'bank_transfer',
-  state: 'processing',
+  state: 'successful',
   amount: ''
 });
 
 const submitNewTransaction = (): void => {
-  if (!form.profileName.trim() || !form.amount.trim()) return;
+  const digits = form.accountNumber.replaceAll(/\D/g, '');
+  if (!activeProfileName.value || !form.amount.trim() || digits.length < 4) return;
   addTransaction({
-    profileName: form.profileName,
+    profileName: activeProfileName.value,
+    accountLast4: digits.slice(-4),
     type: form.type,
     state: form.state,
     amount: form.amount
   });
-  form.profileName = '';
+  page.value = 1;
+  form.accountNumber = '';
   form.type = 'bank_transfer';
-  form.state = 'processing';
+  form.state = 'successful';
   form.amount = '';
   isCreateOpen.value = false;
+};
+
+const goPrev = (): void => {
+  page.value = Math.max(1, page.value - 1);
+};
+
+const goNext = (): void => {
+  page.value = Math.min(totalPages.value, page.value + 1);
 };
 </script>
 
