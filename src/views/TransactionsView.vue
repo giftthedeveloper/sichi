@@ -10,9 +10,10 @@
         <h2>Transactions</h2>
         <p>Review all transactions in the system before creating a new one.</p>
       </div>
-      <button type="button" class="new-btn" @click="isCreateOpen = true">
-        + New Transaction
-      </button>
+      <div class="actions">
+        <button type="button" class="ghost-mini" @click="isHowToOpen = true">How To</button>
+        <button type="button" class="new-btn" @click="isCreateOpen = true">+ New Transaction</button>
+      </div>
     </header>
     <TransactionTable :rows="pagedRows" />
     <footer class="pager">
@@ -59,18 +60,21 @@
         </form>
       </section>
     </div>
+    <HowToModal :open="isHowToOpen" title="How To Use Transactions" :steps="howToSteps" @close="isHowToOpen = false" />
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 
+import HowToModal from '../components/common/HowToModal.vue';
 import TransactionTable from '../components/transactions/TransactionTable.vue';
 import { useChatSession } from '../composables/useChatSession';
 import { useTransactionsMaster } from '../composables/useTransactionsMaster';
 import type { MasterTransaction } from '../types/transactionsMaster';
 
 const isCreateOpen = ref(false);
+const isHowToOpen = ref(false);
 const page = ref(1);
 const pageSize = 5;
 const { state: chatState } = useChatSession();
@@ -92,6 +96,13 @@ const form = reactive<{
   state: 'successful',
   amount: ''
 });
+const howToSteps = [
+  'Review transactions list first before adding a new one.',
+  'Use pagination at bottom to move through transaction pages.',
+  'Click Copy beside any transaction ID when you need to reuse it.',
+  'Click + New Transaction to open modal and create a new record.',
+  'Account number is masked automatically to last 4 digits.'
+] as const;
 
 const submitNewTransaction = (): void => {
   const digits = form.accountNumber.replaceAll(/\D/g, '');
@@ -121,3 +132,4 @@ const goNext = (): void => {
 </script>
 
 <style scoped src="./TransactionsView.css"></style>
+<style scoped src="./TransactionsViewModal.css"></style>

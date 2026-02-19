@@ -6,6 +6,7 @@
       <span class="orb orb-three"></span>
     </div>
     <div class="login-row">
+      <button type="button" class="picker-btn" @click="isHowToOpen = true">How To</button>
       <button type="button" class="picker-btn" @click="router.push('/transactions')">Transactions</button>
       <button type="button" class="picker-btn" @click="isPickerOpen = true">
         {{ selectedUser ? 'Change demo user' : 'Select demo user' }}
@@ -53,6 +54,7 @@
         </ul>
       </section>
     </div>
+    <HowToModal :open="isHowToOpen" title="How To Use Demo" :steps="howToSteps" @close="isHowToOpen = false" />
   </section>
 </template>
 
@@ -60,11 +62,13 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import HowToModal from '../components/common/HowToModal.vue';
 import { useProfilesApi } from '../composables/useProfilesApi';
 import { useChatSession } from '../composables/useChatSession';
 
 const draft = ref('');
 const isPickerOpen = ref(true);
+const isHowToOpen = ref(false);
 const isSubmittingIssue = ref(false);
 const router = useRouter();
 const { state: chatState, selectUserProfile, startCaseFromIssue } = useChatSession();
@@ -81,6 +85,13 @@ const placeholderHints = [
   'I did transfer to wrong account number, please help me urgently.',
   'Web payment failed but my account was debited.',
   'Please check why my reversal has not dropped since yesterday.'
+] as const;
+const howToSteps = [
+  'Open Select demo user, search your name, then click + Use.',
+  'Type a transaction issue on this screen and press send.',
+  'Continue on chat screen and provide requested transaction details.',
+  'Open Transactions to review all transactions in the system.',
+  'Use + New Transaction on that page to add a record.'
 ] as const;
 const animatedPlaceholder = ref('');
 
