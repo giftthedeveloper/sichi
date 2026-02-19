@@ -10,6 +10,26 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
+## Notebook: Local Mistral Connectivity Test
+
+Prerequisite (outside Python):
+
+```bash
+ollama pull mistral
+ollama run mistral
+```
+
+In another terminal:
+
+```bash
+cd backend
+source .venv/bin/activate
+pip install -r requirements-notebook.txt
+jupyter lab notebooks/sichi_rag_playground.ipynb
+```
+
+The notebook sends one prompt to `http://localhost:11434` and prints the response to confirm local connection.
+
 ## Structure
 
 - `app/core` shared infrastructure (db connection)
