@@ -15,6 +15,7 @@ uvicorn app.main:app --reload --port 8000
 - `app/core` shared infrastructure (db connection)
 - `app/domains/profiles` profile domain (models/repository/service/schemas/router)
 - `app/domains/chats` chat domain (models/repository/service/schemas/router)
+- `app/domains/transactions` transaction domain (models/repository/service/schemas/router)
 - `app/api` shared API router + health route
 
 ## Endpoints
@@ -25,6 +26,8 @@ uvicorn app.main:app --reload --port 8000
 - `POST /api/chats/session`
 - `GET /api/chats/{chat_id}?cursor=123&limit=20`
 - `POST /api/chats/{chat_id}/messages`
+- `GET /api/transactions?page=1&page_size=5`
+- `POST /api/transactions`
 
 ## Notes
 

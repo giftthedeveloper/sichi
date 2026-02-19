@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import api_router
 from app.domains.chats.repository import init_chats_tables
 from app.domains.profiles.repository import init_profiles_table
+from app.domains.transactions.repository import init_transactions_table
 
 app = FastAPI(title="sichi-api", version="0.1.0")
 
@@ -14,6 +15,7 @@ app = FastAPI(title="sichi-api", version="0.1.0")
 def startup() -> None:
     init_profiles_table()
     init_chats_tables()
+    init_transactions_table()
 
 
 app.add_middleware(

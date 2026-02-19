@@ -6,20 +6,26 @@
       <span class="orb orb-three"></span>
     </div>
     <header class="top">
-      <div>
+      <div class="title-block">
         <h2>Transactions</h2>
         <p>Review all transactions in the system before creating a new one.</p>
       </div>
       <div class="actions">
-        <button type="button" class="ghost-mini" @click="isHowToOpen = true">How To</button>
-        <button type="button" class="new-btn" @click="isCreateOpen = true">+ New Transaction</button>
+        <button type="button" class="new-btn" @click="openCreateTransaction">+ New Transaction</button>
       </div>
     </header>
-    <TransactionTable :rows="pagedRows" />
+    <TransactionTable :rows="transactions.state.rows" />
     <footer class="pager">
-      <button type="button" class="pager-btn" :disabled="page === 1" @click="goPrev">Prev</button>
-      <p>Page {{ page }} of {{ totalPages }}</p>
-      <button type="button" class="pager-btn" :disabled="page === totalPages" @click="goNext">Next</button>
+      <button type="button" class="pager-btn" :disabled="page === 1 || isLoading" @click="goPrev">Prev</button>
+      <p>Page {{ page }} of {{ transactions.state.totalPages }}</p>
+      <button
+        type="button"
+        class="pager-btn"
+        :disabled="page === transactions.state.totalPages || isLoading"
+        @click="goNext"
+      >
+        Next
+      </button>
     </footer>
     <div v-if="isCreateOpen" class="overlay" @click.self="isCreateOpen = false">
       <section class="create-modal">
@@ -28,9 +34,6 @@
           <button type="button" class="ghost" @click="isCreateOpen = false">X</button>
         </header>
         <form class="modal-form" @submit.prevent="submitNewTransaction">
-          <p class="linked-user">
-            Profile: <strong>{{ activeProfileName || 'No demo user selected' }}</strong>
-          </p>
           <label>
             Account Number
             <input v-model="form.accountNumber" type="text" placeholder="e.g. 0123456789" />
@@ -56,35 +59,36 @@
             Amount
             <input v-model="form.amount" type="text" placeholder="N25,000" />
           </label>
-          <button type="submit" class="new-btn" :disabled="!activeProfileName">Create</button>
+          <button type="submit" class="new-btn" :disabled="!activeProfileName || isLoading">Create</button>
         </form>
       </section>
     </div>
-    <HowToModal :open="isHowToOpen" title="How To Use Transactions" :steps="howToSteps" @close="isHowToOpen = false" />
+    <ProfilePickerModal
+      :open="isProfilePickerOpen"
+      @close="isProfilePickerOpen = false"
+      @selected="onProfileSelected"
+    />
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
-import HowToModal from '../components/common/HowToModal.vue';
+import ProfilePickerModal from '../components/common/ProfilePickerModal.vue';
 import TransactionTable from '../components/transactions/TransactionTable.vue';
 import { useChatSession } from '../composables/useChatSession';
+import type { DemoProfile } from '../types/chatSession';
 import { useTransactionsMaster } from '../composables/useTransactionsMaster';
 import type { MasterTransaction } from '../types/transactionsMaster';
 
 const isCreateOpen = ref(false);
-const isHowToOpen = ref(false);
+const isProfilePickerOpen = ref(false);
+const isLoading = ref(false);
 const page = ref(1);
 const pageSize = 5;
-const { state: chatState } = useChatSession();
-const { rows, addTransaction } = useTransactionsMaster();
+const { state: chatState, selectUserProfile } = useChatSession();
+const transactions = useTransactionsMaster();
 const activeProfileName = computed(() => chatState.activeUser?.name ?? '');
-const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / pageSize)));
-const pagedRows = computed(() => {
-  const start = (page.value - 1) * pageSize;
-  return rows.value.slice(start, start + pageSize);
-});
 const form = reactive<{
   accountNumber: string;
   type: MasterTransaction['type'];
@@ -96,30 +100,64 @@ const form = reactive<{
   state: 'successful',
   amount: ''
 });
-const howToSteps = [
-  'Review transactions list first before adding a new one.',
-  'Use pagination at bottom to move through transaction pages.',
-  'Click Copy beside any transaction ID when you need to reuse it.',
-  'Click + New Transaction to open modal and create a new record.',
-  'Account number is masked automatically to last 4 digits.'
-] as const;
+const loadCurrentPage = async (): Promise<void> => {
+  isLoading.value = true;
+  try {
+    await transactions.loadTransactions(page.value, pageSize);
+  } finally {
+    isLoading.value = false;
+  }
+};
 
-const submitNewTransaction = (): void => {
+onMounted(() => {
+  void loadCurrentPage();
+});
+
+watch(page, () => {
+  void loadCurrentPage();
+});
+
+const submitNewTransaction = async (): Promise<void> => {
   const digits = form.accountNumber.replaceAll(/\D/g, '');
-  if (!activeProfileName.value || !form.amount.trim() || digits.length < 4) return;
-  addTransaction({
-    profileName: activeProfileName.value,
-    accountLast4: digits.slice(-4),
-    type: form.type,
-    state: form.state,
-    amount: form.amount
-  });
-  page.value = 1;
-  form.accountNumber = '';
-  form.type = 'bank_transfer';
-  form.state = 'successful';
-  form.amount = '';
-  isCreateOpen.value = false;
+  if (!activeProfileName.value) {
+    isCreateOpen.value = false;
+    isProfilePickerOpen.value = true;
+    return;
+  }
+  if (!form.amount.trim() || digits.length < 4) return;
+  isLoading.value = true;
+  try {
+    await transactions.addTransaction({
+      profileName: activeProfileName.value,
+      accountLast4: digits.slice(-4),
+      type: form.type,
+      state: form.state,
+      amount: form.amount
+    });
+    page.value = 1;
+    await transactions.loadTransactions(1, pageSize);
+    form.accountNumber = '';
+    form.type = 'bank_transfer';
+    form.state = 'successful';
+    form.amount = '';
+    isCreateOpen.value = false;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const openCreateTransaction = (): void => {
+  if (activeProfileName.value) {
+    isCreateOpen.value = true;
+    return;
+  }
+  isProfilePickerOpen.value = true;
+};
+
+const onProfileSelected = (profile: DemoProfile): void => {
+  selectUserProfile(profile);
+  isProfilePickerOpen.value = false;
+  isCreateOpen.value = true;
 };
 
 const goPrev = (): void => {
@@ -127,7 +165,7 @@ const goPrev = (): void => {
 };
 
 const goNext = (): void => {
-  page.value = Math.min(totalPages.value, page.value + 1);
+  page.value = Math.min(transactions.state.totalPages, page.value + 1);
 };
 </script>
 
