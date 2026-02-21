@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import re
 
 from app.core.db import get_connection
 from app.domains.transactions.models import Transaction
@@ -74,3 +75,66 @@ def list_transactions(page: int, page_size: int) -> tuple[list[Transaction], int
     total = int(total_row["total"]) if total_row else 0
     items = [Transaction(**dict(row)) for row in rows]
     return items, total
+
+
+def list_for_profile(
+    profile_name: str,
+    limit: int = 5,
+    transaction_id: str = "",
+    state: str = "",
+    transaction_type: str = "",
+    account_last4: str = "",
+) -> list[Transaction]:
+    conditions = ["profile_name = ?"]
+    params: list[object] = [profile_name]
+    if transaction_id:
+        conditions.append("id = ?")
+        params.append(transaction_id)
+    if state:
+        conditions.append("state = ?")
+        params.append(state)
+    if transaction_type:
+        conditions.append("type = ?")
+        params.append(transaction_type)
+    if account_last4:
+        conditions.append("account_last4 = ?")
+        params.append(account_last4)
+    params.append(limit)
+    where_clause = " AND ".join(conditions)
+    with get_connection() as connection:
+        rows = connection.execute(
+            f"""
+            SELECT id, profile_name, account_last4, type, amount, state, transaction_date
+            FROM transactions
+            WHERE {where_clause}
+            ORDER BY transaction_date DESC
+            LIMIT ?
+            """,
+            tuple(params),
+        ).fetchall()
+    return [Transaction(**dict(row)) for row in rows]
+
+
+def summarize_profile(profile_name: str) -> dict[str, object]:
+    items = list_for_profile(profile_name=profile_name, limit=200)
+    successful = [item for item in items if item.state == "successful"]
+    failed = [item for item in items if item.state == "failed"]
+    debit_types = {"bank_transfer", "card_payment", "pos_charge", "bills"}
+    credit_types = {"reversal"}
+    net = 0
+    for item in successful:
+        digits = re.sub(r"\D", "", item.amount)
+        amount = int(digits) if digits else 0
+        if item.type in debit_types:
+            net -= amount
+        elif item.type in credit_types:
+            net += amount
+    latest = items[0] if items else None
+    return {
+        "total_transactions": len(items),
+        "successful_transactions": len(successful),
+        "failed_transactions": len(failed),
+        "estimated_net_movement_naira": net,
+        "latest_transaction_id": latest.id if latest else "",
+        "latest_account_last4": latest.account_last4 if latest else "",
+    }

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from app.core.db import get_connection
 from app.domains.profiles.models import Profile
 
@@ -37,3 +39,11 @@ def create(name: str) -> Profile:
             (profile_id, clean_name),
         )
     return Profile(id=profile_id, name=clean_name)
+
+
+def get_by_id(profile_id: str) -> Optional[Profile]:
+    with get_connection() as connection:
+        row = connection.execute("SELECT id, name FROM profiles WHERE id = ?", (profile_id,)).fetchone()
+    if not row:
+        return None
+    return Profile(id=row["id"], name=row["name"])

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from app.domains.chats.intent_service import build_allowed_support_reply, build_escalation_reply, resolve_intent
+from app.domains.chats.lookup_service import build_lookup_reply, run_lookup
 from app.domains.chats import repository
 
 HUMAN_TOKENS = ("human", "agent", "person", "staff")
@@ -41,9 +42,13 @@ def send_message(chat_id: str, text: str):
         else:
             repository.update_chat_state(chat_id, status="active", detail_stage=chat.detail_stage + 1)
             try:
-                reply = build_allowed_support_reply(content)
+                lookup_result = run_lookup(profile_id=chat.profile_id, user_text=content)
+                reply = build_lookup_reply(content, lookup_result)
             except Exception:
-                reply = "I am currently unavailable. Please try again shortly or reply with human for escalation."
+                try:
+                    reply = build_allowed_support_reply(content)
+                except Exception:
+                    reply = "I am currently unavailable. Please try again shortly or reply with human for escalation."
             repository.save_message(chat_id, "bot", reply)
 
     latest_chat = repository.get_chat(chat_id)

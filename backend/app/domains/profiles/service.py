@@ -17,3 +17,7 @@ def list_profiles(query: Optional[str]) -> list[Profile]:
 
 def create_profile(name: str) -> Profile:
     return repository.create(name)
+
+
+def get_profile(profile_id: str) -> Optional[Profile]:
+    return repository.get_by_id(profile_id)
