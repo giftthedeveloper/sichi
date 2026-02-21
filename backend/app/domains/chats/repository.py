@@ -8,9 +8,15 @@ from fastapi import HTTPException
 from app.core.db import get_connection
 from app.domains.chats.models import Chat, ChatMessage
 
+VALID_STATUSES = {"active", "escalated"}
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _normalize_status(value: str) -> str:
+    return value if value in VALID_STATUSES else "active"
 
 
 def init_chats_tables() -> None:
@@ -42,6 +48,8 @@ def init_chats_tables() -> None:
         )
         connection.execute("CREATE INDEX IF NOT EXISTS idx_chats_profile ON chats(profile_id)")
         connection.execute("CREATE INDEX IF NOT EXISTS idx_messages_chat ON chat_messages(chat_id, id)")
+        # Backward compatibility for rows created before status simplification.
+        connection.execute("UPDATE chats SET status = 'active' WHERE status NOT IN ('active', 'escalated')")
 
 
 def profile_exists(profile_id: str) -> bool:
@@ -58,14 +66,19 @@ def get_or_create_active_chat(profile_id: str) -> Chat:
             """
             SELECT id, profile_id, status, detail_stage, created_at, updated_at
             FROM chats
-            WHERE profile_id = ? AND status != 'resolved'
+            WHERE profile_id = ?
             ORDER BY created_at DESC
             LIMIT 1
             """,
             (profile_id,),
         ).fetchone()
         if row:
-            return Chat(**dict(row))
+            data = dict(row)
+            normalized = _normalize_status(str(data["status"]))
+            if normalized != data["status"]:
+                connection.execute("UPDATE chats SET status = ?, updated_at = ? WHERE id = ?", (normalized, _now_iso(), data["id"]))
+                data["status"] = normalized
+            return Chat(**data)
 
         count = connection.execute("SELECT COUNT(*) AS total FROM chats").fetchone()
         chat_id = f"CH-{(int(count['total']) if count else 0) + 1}"
@@ -88,7 +101,13 @@ def get_chat(chat_id: str) -> Chat:
         ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Chat not found")
-    return Chat(**dict(row))
+    data = dict(row)
+    normalized = _normalize_status(str(data["status"]))
+    if normalized != data["status"]:
+        with get_connection() as connection:
+            connection.execute("UPDATE chats SET status = ?, updated_at = ? WHERE id = ?", (normalized, _now_iso(), chat_id))
+        data["status"] = normalized
+    return Chat(**data)
 
 
 def save_message(chat_id: str, sender: str, text: str) -> ChatMessage:
@@ -104,10 +123,11 @@ def save_message(chat_id: str, sender: str, text: str) -> ChatMessage:
 
 
 def update_chat_state(chat_id: str, status: str, detail_stage: int) -> None:
+    safe_status = _normalize_status(status)
     with get_connection() as connection:
         connection.execute(
             "UPDATE chats SET status = ?, detail_stage = ?, updated_at = ? WHERE id = ?",
-            (status, detail_stage, _now_iso(), chat_id),
+            (safe_status, detail_stage, _now_iso(), chat_id),
         )
 
 

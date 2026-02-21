@@ -10,6 +10,21 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
+Chats now use local Ollama by default. Ensure Ollama is running and model is available:
+
+```bash
+ollama pull mistral
+```
+
+Optional env values:
+
+```env
+OLLAMA_URL=http://localhost:11434/api/chat
+OLLAMA_MODEL=mistral
+ALLOWED_CATEGORIES=failed_transfer,card_debit_dispute,bill_payment_issue,reversal_request
+ALL_CATEGORIES=failed_transfer,card_debit_dispute,bill_payment_issue,reversal_request,loan_request,account_opening,other
+```
+
 ## Notebook: Local Mistral Connectivity Test
 
 Prerequisite (outside Python):

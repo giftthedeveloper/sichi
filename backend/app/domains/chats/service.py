@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from app.domains.chats.models import Chat
+from app.domains.chats.intent_service import build_allowed_support_reply, build_escalation_reply, resolve_intent
 from app.domains.chats import repository
 
 HUMAN_TOKENS = ("human", "agent", "person", "staff")
@@ -29,19 +29,22 @@ def send_message(chat_id: str, text: str):
     if any(token in lowered for token in HUMAN_TOKENS):
         repository.update_chat_state(chat_id, status="escalated", detail_stage=chat.detail_stage)
         repository.save_message(chat_id, "bot", "Done. I have moved this chat to human support queue.")
-    elif chat.status in ("resolved", "escalated"):
-        repository.save_message(chat_id, "bot", "This chat is closed. Start a new chat for another issue.")
-    elif chat.detail_stage == 0:
-        repository.update_chat_state(chat_id, status="active", detail_stage=1)
-        repository.save_message(chat_id, "bot", "Thanks. Please share transaction date and time.")
-    elif chat.detail_stage == 1:
-        repository.update_chat_state(chat_id, status="active", detail_stage=2)
-        repository.save_message(chat_id, "bot", "Got it. Please provide transaction reference or recipient account.")
-    elif chat.detail_stage == 2:
-        repository.update_chat_state(chat_id, status="ready_to_resolve", detail_stage=3)
-        repository.save_message(chat_id, "bot", f"Chat {chat_id} is complete. I can escalate to human support if needed.")
     else:
-        repository.save_message(chat_id, "bot", 'Reply with "human" if you want escalation, or continue for more help.')
+        intent = resolve_intent(content)
+        if not intent.is_allowed:
+            repository.update_chat_state(chat_id, status="escalated", detail_stage=chat.detail_stage)
+            try:
+                reply = build_escalation_reply(content)
+            except Exception:
+                reply = "This issue is outside what I can resolve right now. I have escalated it to a human agent."
+            repository.save_message(chat_id, "bot", reply)
+        else:
+            repository.update_chat_state(chat_id, status="active", detail_stage=chat.detail_stage + 1)
+            try:
+                reply = build_allowed_support_reply(content)
+            except Exception:
+                reply = "I am currently unavailable. Please try again shortly or reply with human for escalation."
+            repository.save_message(chat_id, "bot", reply)
 
     latest_chat = repository.get_chat(chat_id)
     messages, next_cursor, has_more = repository.list_messages(chat_id, cursor=None, limit=20)

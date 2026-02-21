@@ -5,7 +5,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-ChatStatus = Literal["active", "ready_to_resolve", "resolved", "escalated"]
+ChatStatus = Literal["active", "escalated"]
 Sender = Literal["user", "bot"]
 
 

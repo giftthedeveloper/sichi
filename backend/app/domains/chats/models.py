@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-ChatStatus = Literal["active", "ready_to_resolve", "resolved", "escalated"]
+ChatStatus = Literal["active", "escalated"]
 Sender = Literal["user", "bot"]
 
 
