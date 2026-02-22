@@ -24,6 +24,23 @@
   padding: 22px;
 }
 
+.author-link {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 26;
+  border: 0;
+  background: transparent;
+  color: rgb(104 91 100 / 78%);
+  padding: 0;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  text-align: center;
+}
+
 @media (max-width: 760px) {
   .global-guide {
     top: 28px;
@@ -34,5 +51,11 @@
 
   .content {
     padding: 14px;
+  }
+
+  .author-link {
+    left: 50%;
+    bottom: 12px;
+    max-width: calc(100vw - 28px);
   }
 }

@@ -1,6 +1,7 @@
 <template>
   <main class="shell">
     <button v-if="showGuideButton" type="button" class="global-guide" @click="startTour">Demo Guide</button>
+    <button type="button" class="author-link" @click="isAuthorOpen = true">Meet the developer</button>
     <section class="content">
       <slot />
     </section>
@@ -15,6 +16,7 @@
       @prev="prevStep"
       @next="nextStep"
     />
+    <AuthorModal :open="isAuthorOpen" @close="isAuthorOpen = false" />
   </main>
 </template>
 
@@ -23,6 +25,7 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import AppTourOverlay from '../common/AppTourOverlay.vue';
+import AuthorModal from '../common/AuthorModal.vue';
 
 interface TourStep {
   route: '/' | '/chat' | '/transactions';
@@ -45,6 +48,7 @@ const browser = globalThis as unknown as BrowserEnv;
 const router = useRouter();
 const route = useRoute();
 const isTourOpen = ref(false);
+const isAuthorOpen = ref(false);
 const stepIndex = ref(0);
 const activeRect = ref<{ top: number; left: number; width: number; height: number } | null>(null);
 

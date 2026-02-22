@@ -1,0 +1,163 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgb(29 24 34 / 18%);
+  display: grid;
+  place-items: center;
+  padding: 14px;
+}
+
+.modal {
+  width: min(680px, 96vw);
+  max-height: min(82dvh, 760px);
+  overflow: auto;
+  border: 1px solid #eddde7;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 85% -10%, rgb(249 220 236 / 70%), transparent 45%),
+    radial-gradient(circle at 5% 110%, rgb(246 233 240 / 70%), transparent 38%),
+    rgb(255 255 255 / 98%);
+  padding: 10px 14px 12px;
+  display: grid;
+  gap: 12px;
+  box-shadow: 0 24px 54px rgb(24 18 28 / 14%);
+  animation: sheet-rise 240ms ease-out;
+}
+
+.grabber {
+  width: 48px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgb(144 127 137 / 35%);
+  margin: 0 auto 2px;
+}
+
+.head {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent-main);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.close {
+  position: absolute;
+  right: 0;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.hero {
+  display: grid;
+  gap: 4px;
+}
+
+.hero h3 {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.role {
+  margin: 0;
+  color: #6f5c69;
+  font-size: 0.84rem;
+}
+
+.headline {
+  margin: 2px 0 0;
+  color: var(--text-main);
+  line-height: 1.35;
+  font-size: 0.9rem;
+}
+
+.body {
+  display: grid;
+  gap: 8px;
+}
+
+.body p {
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.4;
+  font-size: 0.86rem;
+}
+
+.links {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.link-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f2f4;
+  color: #111;
+}
+
+.icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+@media (max-width: 760px) {
+  .overlay {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .modal {
+    width: min(680px, 100vw);
+    border-radius: 16px 16px 0 0;
+    padding-inline: 12px;
+  }
+
+  .links {
+    justify-content: center;
+  }
+}
+
+@keyframes sheet-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
