@@ -67,7 +67,7 @@ import { useProfilesApi } from '../composables/useProfilesApi';
 import { useChatSession } from '../composables/useChatSession';
 
 const draft = ref('');
-const isPickerOpen = ref(true);
+const isPickerOpen = ref(false);
 const isHowToOpen = ref(false);
 const isSubmittingIssue = ref(false);
 const router = useRouter();
@@ -125,6 +125,9 @@ const runPlaceholderAnimation = (): void => {
 };
 
 onMounted(() => {
+  if (!selectedUser.value) {
+    isPickerOpen.value = true;
+  }
   runPlaceholderAnimation();
 });
 
