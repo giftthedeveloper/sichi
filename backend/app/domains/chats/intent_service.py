@@ -10,6 +10,7 @@ from app.domains.chats.config import (
     get_out_of_scope_categories,
 )
 from app.domains.chats.llm_client import ask_ollama
+from app.domains.chats.policy_service import classifier_prompt, sichi_prompt
 
 
 class IntentResult:
@@ -20,14 +21,8 @@ class IntentResult:
 
 def classify_intent(text: str) -> str:
     categories = get_all_categories()
-    system_prompt = (
-        "You are a bank support intent classifier. "
-        "Return ONLY JSON in this exact format: {\"category\":\"...\"}. "
-        "Choose exactly one category from: "
-        + ", ".join(categories)
-    )
     try:
-        raw = ask_ollama(prompt=text, system=system_prompt)
+        raw = ask_ollama(prompt=text, system=classifier_prompt(categories))
         parsed = json.loads(raw)
         category = str(parsed.get("category", "generic_help_request")).strip()
         return category if category in categories else "generic_help_request"
@@ -50,29 +45,32 @@ def resolve_intent(text: str) -> IntentResult:
 
 
 def build_allowed_support_reply(user_text: str) -> str:
-    system_prompt = (
-        "You are Sichi, a banking customer support assistant. "
-        "Handle only banking transaction support in concise, practical language. "
-        "If details are missing, ask one clear follow-up question."
+    return ask_ollama(
+        prompt=user_text,
+        system=sichi_prompt(
+            "Handle only banking transaction support in concise, practical language. "
+            "If details are missing, ask one clear follow-up question."
+        ),
     )
-    return ask_ollama(prompt=user_text, system=system_prompt)
 
 
 def build_neutral_redirect_reply(user_text: str) -> str:
-    system_prompt = (
-        "You are Sichi, a banking customer support assistant. "
-        "The user has not stated a clear banking transaction issue yet. "
-        "Reply politely, do not reveal any account or transaction data, and ask what banking transaction issue they need help with. "
-        "Be concise."
+    return ask_ollama(
+        prompt=user_text,
+        system=sichi_prompt(
+            "The user has not stated a clear banking transaction issue yet. "
+            "Reply politely, do not reveal any account or transaction data, and ask what banking transaction issue they need help with. "
+            "Be concise."
+        ),
     )
-    return ask_ollama(prompt=user_text, system=system_prompt)
 
 
 def build_out_of_scope_reply(user_text: str) -> str:
-    system_prompt = (
-        "You are Sichi, a banking customer support assistant. "
-        "The user request is outside Sichi's primary function. "
-        "Politely say you cannot help with that and that your primary function is banking transaction support only. "
-        "Do not escalate. Be concise."
+    return ask_ollama(
+        prompt=user_text,
+        system=sichi_prompt(
+            "The user request is outside Sichi's primary function. "
+            "Politely say you cannot help with that and that your primary function is banking transaction support only. "
+            "Do not escalate. Be concise."
+        ),
     )
-    return ask_ollama(prompt=user_text, system=system_prompt)

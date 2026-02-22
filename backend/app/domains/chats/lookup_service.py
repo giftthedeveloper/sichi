@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import re
 
 from app.domains.chats.llm_client import ask_ollama
+from app.domains.chats.policy_service import planner_prompt, sichi_prompt
 from app.domains.profiles import service as profiles_service
 from app.domains.transactions import repository as transactions_repository
 
@@ -65,15 +66,7 @@ def _parse_action_json(raw: str) -> dict[str, object]:
 def _plan_action(user_text: str) -> dict[str, object]:
     if _is_generic_message(user_text):
         return {"action": "none", "filters": {}}
-    system_prompt = (
-        "You are an action planner for a banking bot. "
-        "Return ONLY JSON in this format: "
-        '{"action":"lookup_profile|lookup_transactions|lookup_balance|none","filters":{"transaction_id":"","state":"","type":"","account_last4":"","limit":5}}. '
-        "Pick lookup_profile if user asks for name/profile/account identity. "
-        "Pick lookup_transactions for transaction checks or references. "
-        "Pick lookup_balance for balance questions."
-    )
-    raw = ask_ollama(prompt=user_text, system=system_prompt)
+    raw = ask_ollama(prompt=user_text, system=planner_prompt())
     return _parse_action_json(raw)
 
 
@@ -153,8 +146,7 @@ def run_lookup(profile_id: str, user_text: str) -> LookupResult:
 
 
 def build_lookup_reply(user_text: str, lookup_result: LookupResult) -> str:
-    system_prompt = (
-        "You are Sichi, a banking customer support assistant. "
+    system_prompt = sichi_prompt(
         "Use the lookup context to answer accurately and only reveal requested details. "
         "Do not invent data not present in context. "
         "If lookup action is none or payload is empty, do not reveal any account or transaction data. "
