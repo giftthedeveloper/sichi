@@ -7,6 +7,7 @@
   "scripts": {
     "start": "bun run start:all",
     "start:all": "bun install && ./scripts/dev.sh",
+    "prod": "./scripts/prod.sh",
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
