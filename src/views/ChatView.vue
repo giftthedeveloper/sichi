@@ -16,12 +16,7 @@
       </button>
     </header>
 
-    <section v-if="!session.activeCase" class="empty">
-      <h2>No active case yet</h2>
-      <p>Go back and submit an issue from Screen 1.</p>
-    </section>
-
-    <section v-else class="chat-body">
+    <section v-if="session.activeCase" class="chat-body">
       <div ref="threadRef" class="thread">
         <template v-for="item in threadItems" :key="item.id">
           <p v-if="item.kind === 'separator'" class="date-separator">{{ item.label }}</p>
@@ -130,10 +125,22 @@ const submitMessage = async (): Promise<void> => {
 };
 
 onMounted(() => {
-  if (!session.activeCase && session.activeUser) {
-    void ensureSessionForActiveUser();
-  }
-  void nextTick(scrollThreadToBottom);
+  const init = async (): Promise<void> => {
+    if (!session.activeUser) {
+      await router.push('/');
+      return;
+    }
+    if (!session.activeCase) {
+      await ensureSessionForActiveUser();
+    }
+    if (!session.activeCase) {
+      await router.push('/');
+      return;
+    }
+    await nextTick();
+    scrollThreadToBottom();
+  };
+  void init();
 });
 
 watch(

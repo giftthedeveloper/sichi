@@ -124,6 +124,7 @@ const closeTour = (): void => {
 const nextStep = (): void => {
   if (stepIndex.value >= tourSteps.length - 1) {
     closeTour();
+    void router.push('/');
     return;
   }
   stepIndex.value += 1;

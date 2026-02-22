@@ -8,7 +8,6 @@
   position: absolute;
   inset: 0;
   background: rgb(26 20 29 / 56%);
-  backdrop-filter: blur(2px);
 }
 
 .spotlight {
