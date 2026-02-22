@@ -37,26 +37,30 @@ def _chat_to_schema(
 
 
 @router.post("/session", response_model=ChatResponse)
-def get_or_create_chat_session(
+async def get_or_create_chat_session(
     payload: ChatSessionRequest,
     cursor: Optional[int] = Query(default=None),
     limit: int = Query(default=20, ge=1, le=100),
 ) -> ChatResponse:
-    chat, messages, next_cursor, has_more = service.get_or_create_chat(payload.profile_id, cursor=cursor, limit=limit)
+    chat, messages, next_cursor, has_more = await service.get_or_create_chat_async(
+        payload.profile_id, cursor=cursor, limit=limit
+    )
     return _chat_to_schema(chat, messages, next_cursor, has_more)
 
 
 @router.get("/{chat_id}", response_model=ChatResponse)
-def get_chat_with_messages(
+async def get_chat_with_messages(
     chat_id: str,
     cursor: Optional[int] = Query(default=None),
     limit: int = Query(default=20, ge=1, le=100),
 ) -> ChatResponse:
-    chat, messages, next_cursor, has_more = service.get_chat_with_messages(chat_id, cursor=cursor, limit=limit)
+    chat, messages, next_cursor, has_more = await service.get_chat_with_messages_async(
+        chat_id, cursor=cursor, limit=limit
+    )
     return _chat_to_schema(chat, messages, next_cursor, has_more)
 
 
 @router.post("/{chat_id}/messages", response_model=ChatResponse)
-def send_chat_message(chat_id: str, payload: SendMessageRequest) -> ChatResponse:
-    chat, messages, next_cursor, has_more = service.send_message(chat_id=chat_id, text=payload.text)
+async def send_chat_message(chat_id: str, payload: SendMessageRequest) -> ChatResponse:
+    chat, messages, next_cursor, has_more = await service.send_message(chat_id=chat_id, text=payload.text)
     return _chat_to_schema(chat, messages, next_cursor, has_more)

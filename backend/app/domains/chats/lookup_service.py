@@ -66,7 +66,7 @@ def _parse_action_json(raw: str) -> dict[str, object]:
 def _plan_action(user_text: str) -> dict[str, object]:
     if _is_generic_message(user_text):
         return {"action": "none", "filters": {}}
-    raw = ask_ollama(prompt=user_text, system=planner_prompt())
+    raw = ask_ollama(prompt=user_text, system=planner_prompt(), trace="lookup_planner")
     return _parse_action_json(raw)
 
 
@@ -155,4 +155,4 @@ def build_lookup_reply(user_text: str, lookup_result: LookupResult) -> str:
     )
     context = json.dumps({"action": lookup_result.action, "payload": lookup_result.payload})
     prompt = f"User message: {user_text}\nLookup context: {context}"
-    return ask_ollama(prompt=prompt, system=system_prompt)
+    return ask_ollama(prompt=prompt, system=system_prompt, trace="reply_lookup")

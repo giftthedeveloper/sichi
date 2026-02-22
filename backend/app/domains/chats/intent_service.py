@@ -22,7 +22,7 @@ class IntentResult:
 def classify_intent(text: str) -> str:
     categories = get_all_categories()
     try:
-        raw = ask_ollama(prompt=text, system=classifier_prompt(categories))
+        raw = ask_ollama(prompt=text, system=classifier_prompt(categories), trace="intent_classifier")
         parsed = json.loads(raw)
         category = str(parsed.get("category", "generic_help_request")).strip()
         return category if category in categories else "generic_help_request"
@@ -51,6 +51,7 @@ def build_allowed_support_reply(user_text: str) -> str:
             "Handle only banking transaction support in concise, practical language. "
             "If details are missing, ask one clear follow-up question."
         ),
+        trace="reply_allowed_fallback",
     )
 
 
@@ -62,6 +63,7 @@ def build_neutral_redirect_reply(user_text: str) -> str:
             "Reply politely, do not reveal any account or transaction data, and ask what banking transaction issue they need help with. "
             "Be concise."
         ),
+        trace="reply_neutral",
     )
 
 
@@ -73,4 +75,5 @@ def build_out_of_scope_reply(user_text: str) -> str:
             "Politely say you cannot help with that and that your primary function is banking transaction support only. "
             "Do not escalate. Be concise."
         ),
+        trace="reply_out_of_scope",
     )
