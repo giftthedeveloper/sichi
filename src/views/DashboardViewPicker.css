@@ -92,16 +92,6 @@ h2 {
   font-size: 1rem;
 }
 
-.close-btn {
-  border: 0;
-  background: #f4eef6;
-  color: var(--text-main);
-  border-radius: 999px;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-}
-
 .search-box input {
   width: 100%;
   border: 1px solid var(--border);
@@ -186,7 +176,24 @@ h2 {
 
 @media (max-width: 760px) {
   .login-row {
-    top: 10px;
+    top: 14px;
     right: 12px;
   }
+
+  .picker-btn {
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+  }
+
+  .user-menu-trigger {
+    width: auto;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+  }
+  .user-menu-panel { min-width: 180px; }
 }

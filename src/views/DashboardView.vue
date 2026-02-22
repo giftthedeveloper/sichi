@@ -6,14 +6,18 @@
       <span class="orb orb-three"></span>
     </div>
     <div class="login-row">
-      <button type="button" class="picker-btn" @click="router.push('/transactions')">Transactions</button>
+      <button type="button" class="picker-btn desktop-only" @click="router.push('/transactions')">Transactions</button>
       <div class="user-menu">
         <button type="button" class="picker-btn user-menu-trigger" data-tour="dashboard-user-menu" @click="toggleUserMenu">
-          {{ selectedUser ? selectedUser.name : 'Select demo user' }}
-          <span class="caret" aria-hidden="true">▾</span>
+          <span class="desktop-label">{{ selectedUser ? selectedUser.name : 'Select demo user' }}</span>
+          <span class="mobile-bars" aria-hidden="true">☰</span>
+          <span class="caret desktop-only" aria-hidden="true">▾</span>
         </button>
         <div v-if="isUserMenuOpen" class="user-menu-panel">
-          <button type="button" class="user-menu-item" @click="openProfilePickerFromMenu">Change demo user</button>
+          <button type="button" class="user-menu-item mobile-only" @click="openTransactionsFromMenu">Transactions</button>
+          <button type="button" class="user-menu-item" @click="openProfilePickerFromMenu">
+            {{ selectedUser ? 'Change demo user' : 'Select demo user' }}
+          </button>
         </div>
       </div>
     </div>
@@ -31,7 +35,6 @@
       <section class="picker-modal">
         <div class="picker-head">
           <h2>Choose a demo profile</h2>
-          <button type="button" class="close-btn" @click="isPickerOpen = false">X</button>
         </div>
         <label class="search-box">
           <span class="sr-only">Search profile</span>
@@ -144,12 +147,12 @@ const submitStarter = async (): Promise<void> => {
 };
 
 const toggleUserMenu = (): void => {
-  if (!selectedUser.value) {
-    isPickerOpen.value = true;
-    isUserMenuOpen.value = false;
-    return;
-  }
   isUserMenuOpen.value = !isUserMenuOpen.value;
+};
+
+const openTransactionsFromMenu = (): void => {
+  isUserMenuOpen.value = false;
+  router.push('/transactions');
 };
 
 const openProfilePickerFromMenu = (): void => {

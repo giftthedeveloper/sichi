@@ -62,6 +62,19 @@ h1 {
   height: 18px;
 }
 
+.desktop-only {
+  display: inline-flex;
+}
+
+.desktop-label {
+  display: inline;
+}
+
+.mobile-only,
+.mobile-bars {
+  display: none;
+}
+
 .ambient {
   position: absolute;
   inset: 0;
@@ -130,9 +143,58 @@ h1 {
     border-radius: 20px;
   }
 
-  .orb-one,
-  .orb-two,
+  .desktop-only {
+    display: none;
+  }
+
+  .desktop-label {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  .mobile-bars {
+    display: inline-block;
+    font-size: 1.02rem;
+    line-height: 1;
+  }
+
+  .orb {
+    opacity: 0.34;
+    animation-name: float-mobile;
+    animation-duration: 8s;
+  }
+
+  .orb-one {
+    width: 150px;
+    height: 150px;
+    top: 8%;
+    left: -2%;
+  }
+
+  .orb-two {
+    width: 120px;
+    height: 120px;
+    top: 58%;
+    right: -1%;
+  }
+
   .orb-three {
-    opacity: 0.35;
+    width: 96px;
+    height: 96px;
+    bottom: 8%;
+    left: 58%;
+  }
+}
+
+@keyframes float-mobile {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-34px) translateX(24px);
   }
 }

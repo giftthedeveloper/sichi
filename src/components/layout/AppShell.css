@@ -5,9 +5,11 @@
 
 .global-guide {
   position: fixed;
-  top: 16px;
+  top: 36px;
   left: 20px;
   z-index: 30;
+  display: inline-flex;
+  align-items: center;
   border: 0;
   background: transparent;
   color: var(--accent-strong);
@@ -24,8 +26,10 @@
 
 @media (max-width: 760px) {
   .global-guide {
-    top: 10px;
+    top: 28px;
     left: 14px;
+    height: 34px;
+    line-height: 1;
   }
 
   .content {
