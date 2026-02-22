@@ -1,5 +1,6 @@
 import { computed, reactive } from 'vue';
 
+import { API_BASE_URL } from '../lib/apiBase';
 import type { CaseRecord, ConversationMessage, DemoProfile } from '../types/chatSession';
 
 interface ChatApiMessage {
@@ -24,8 +25,6 @@ interface ChatState {
   activeCase: CaseRecord | null;
   messages: ConversationMessage[];
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000';
 
 const state = reactive<ChatState>({
   activeUser: null,

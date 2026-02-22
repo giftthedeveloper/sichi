@@ -1,8 +1,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 
+import { API_BASE_URL } from '../lib/apiBase';
 import type { DemoProfile } from '../types/chatSession';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000';
 
 const searchProfilesRequest = async (query: string): Promise<DemoProfile[]> => {
   const response = await fetch(`${API_BASE_URL}/api/profiles?query=${encodeURIComponent(query)}`);

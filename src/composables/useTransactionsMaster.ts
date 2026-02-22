@@ -1,5 +1,6 @@
 import { reactive } from 'vue';
 
+import { API_BASE_URL } from '../lib/apiBase';
 import type { MasterTransaction } from '../types/transactionsMaster';
 
 interface TransactionsApiItem {
@@ -25,8 +26,6 @@ interface TransactionsState {
   totalPages: number;
   total: number;
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000';
 
 const state = reactive<TransactionsState>({
   rows: [],
