@@ -20,4 +20,6 @@ export interface ConversationMessage {
   sender: ConversationSender;
   text: string;
   time: string;
+  createdAt: string;
+  isTyping?: boolean;
 }

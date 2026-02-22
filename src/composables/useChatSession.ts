@@ -12,7 +12,7 @@ interface ChatApiMessage {
 interface ChatApiResponse {
   id: string;
   profile_id: string;
-  status: 'active' | 'ready_to_resolve' | 'resolved' | 'escalated';
+  status: 'active' | 'escalated';
   detail_stage: number;
   created_at: string;
   updated_at: string;
@@ -36,6 +36,14 @@ const state = reactive<ChatState>({
 const toUiTime = (iso: string): string =>
   new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+const toUiMessage = (message: ChatApiMessage): ConversationMessage => ({
+  id: String(message.id),
+  sender: message.sender,
+  text: message.text,
+  time: toUiTime(message.created_at),
+  createdAt: message.created_at
+});
+
 const hydrateFromApi = (payload: ChatApiResponse): void => {
   state.activeCase = {
     id: payload.id,
@@ -44,12 +52,11 @@ const hydrateFromApi = (payload: ChatApiResponse): void => {
     createdAt: payload.created_at,
     updatedAt: payload.updated_at
   };
-  state.messages = payload.messages.map((message) => ({
-    id: String(message.id),
-    sender: message.sender,
-    text: message.text,
-    time: toUiTime(message.created_at)
-  }));
+  state.messages = payload.messages.map(toUiMessage);
+};
+
+const removeTypingPlaceholders = (): void => {
+  state.messages = state.messages.filter((message) => !message.isTyping);
 };
 
 const postJson = async <T>(path: string, body: object): Promise<T> => {
@@ -85,10 +92,32 @@ export function useChatSession() {
 
   const sendMessage = async (text: string): Promise<void> => {
     if (!state.activeCase || !text.trim()) return;
-    const data = await postJson<ChatApiResponse>(`/api/chats/${state.activeCase.id}/messages`, {
-      text: text.trim()
+    const cleanText = text.trim();
+    const nowIso = new Date().toISOString();
+    state.messages.push({
+      id: `local-user-${Date.now()}`,
+      sender: 'user',
+      text: cleanText,
+      time: toUiTime(nowIso),
+      createdAt: nowIso
     });
-    hydrateFromApi(data);
+    state.messages.push({
+      id: `local-bot-typing-${Date.now() + 1}`,
+      sender: 'bot',
+      text: '',
+      time: '',
+      createdAt: nowIso,
+      isTyping: true
+    });
+    try {
+      const data = await postJson<ChatApiResponse>(`/api/chats/${state.activeCase.id}/messages`, {
+        text: cleanText
+      });
+      hydrateFromApi(data);
+    } catch (error) {
+      removeTypingPlaceholders();
+      throw error;
+    }
   };
 
   return {

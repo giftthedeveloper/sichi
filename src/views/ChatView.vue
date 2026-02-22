@@ -21,10 +21,18 @@
 
     <section v-else class="chat-body">
       <div class="thread">
-        <article v-for="message in session.messages" :key="message.id" class="bubble" :class="message.sender">
-          <p>{{ message.text }}</p>
-          <small>{{ message.time }}</small>
-        </article>
+        <template v-for="item in threadItems" :key="item.id">
+          <p v-if="item.kind === 'separator'" class="date-separator">{{ item.label }}</p>
+          <article v-else class="bubble" :class="[item.message.sender, { typing: item.message.isTyping }]">
+            <div v-if="item.message.isTyping" class="typing-dots" aria-label="Sichi is typing">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <p v-else>{{ item.message.text }}</p>
+            <small v-if="!item.message.isTyping">{{ item.message.time }}</small>
+          </article>
+        </template>
       </div>
       <form class="composer" @submit.prevent="submitMessage">
         <label class="field">
@@ -46,11 +54,16 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useChatSession } from '../composables/useChatSession';
+import type { ConversationMessage } from '../types/chatSession';
 
 const router = useRouter();
 const draft = ref('');
 const isSending = ref(false);
 const { state: session, sendMessage, ensureSessionForActiveUser } = useChatSession();
+
+type ThreadItem =
+  | { id: string; kind: 'separator'; label: string }
+  | { id: string; kind: 'message'; message: ConversationMessage };
 
 const statusLabel = computed(() => {
   const status = session.activeCase?.status;
@@ -66,13 +79,42 @@ const inputPlaceholder = computed(() => {
   return 'Type a follow-up or request human support';
 });
 
+const sameLocalDate = (left: Date, right: Date): boolean =>
+  left.getFullYear() === right.getFullYear() &&
+  left.getMonth() === right.getMonth() &&
+  left.getDate() === right.getDate();
+
+const dateLabel = (iso: string): string => {
+  const target = new Date(iso);
+  const now = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  if (sameLocalDate(target, now)) return 'Today';
+  if (sameLocalDate(target, yesterday)) return 'Yesterday';
+  return target.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+const threadItems = computed<ThreadItem[]>(() => {
+  const items: ThreadItem[] = [];
+  let previousLabel = '';
+  for (const message of session.messages) {
+    const label = dateLabel(message.createdAt);
+    if (label !== previousLabel) {
+      items.push({ id: `sep-${message.id}`, kind: 'separator', label });
+      previousLabel = label;
+    }
+    items.push({ id: `msg-${message.id}`, kind: 'message', message });
+  }
+  return items;
+});
+
 const submitMessage = async (): Promise<void> => {
   const text = draft.value.trim();
   if (!text) return;
+  draft.value = '';
   isSending.value = true;
   try {
     await sendMessage(text);
-    draft.value = '';
   } finally {
     isSending.value = false;
   }
