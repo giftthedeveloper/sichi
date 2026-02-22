@@ -19,13 +19,46 @@
   cursor: pointer;
 }
 
-.user-chip {
-  margin: 0;
-  background: var(--accent-soft);
-  color: var(--accent-main);
-  border-radius: 999px;
-  padding: 7px 11px;
-  font-size: 0.8rem;
+.user-menu {
+  position: relative;
+}
+
+.user-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.caret {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.user-menu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 170px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 10px 24px rgb(28 21 32 / 10%);
+}
+
+.user-menu-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text-main);
+  text-align: left;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.user-menu-item:hover {
+  background: #f8f1f5;
 }
 
 .overlay {

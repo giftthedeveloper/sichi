@@ -6,12 +6,16 @@
       <span class="orb orb-three"></span>
     </div>
     <div class="login-row">
-      <button type="button" class="picker-btn" @click="isHowToOpen = true">How To</button>
       <button type="button" class="picker-btn" @click="router.push('/transactions')">Transactions</button>
-      <button type="button" class="picker-btn" @click="isPickerOpen = true">
-        {{ selectedUser ? 'Change demo user' : 'Select demo user' }}
-      </button>
-      <p v-if="selectedUser" class="user-chip">{{ selectedUser.name }}</p>
+      <div class="user-menu">
+        <button type="button" class="picker-btn user-menu-trigger" @click="toggleUserMenu">
+          {{ selectedUser ? selectedUser.name : 'Select demo user' }}
+          <span class="caret" aria-hidden="true">▾</span>
+        </button>
+        <div v-if="isUserMenuOpen" class="user-menu-panel">
+          <button type="button" class="user-menu-item" @click="openProfilePickerFromMenu">Change demo user</button>
+        </div>
+      </div>
     </div>
     <h1>How can I help?</h1>
     <form class="input-wrap" @submit.prevent="submitStarter">
@@ -54,7 +58,6 @@
         </ul>
       </section>
     </div>
-    <HowToModal :open="isHowToOpen" title="How To Use Demo" :steps="howToSteps" @close="isHowToOpen = false" />
   </section>
 </template>
 
@@ -62,13 +65,12 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import HowToModal from '../components/common/HowToModal.vue';
 import { useProfilesApi } from '../composables/useProfilesApi';
 import { useChatSession } from '../composables/useChatSession';
 
 const draft = ref('');
 const isPickerOpen = ref(false);
-const isHowToOpen = ref(false);
+const isUserMenuOpen = ref(false);
 const isSubmittingIssue = ref(false);
 const router = useRouter();
 const { state: chatState, selectUserProfile, startCaseFromIssue } = useChatSession();
@@ -76,6 +78,7 @@ const selectedUser = computed(() => chatState.activeUser);
 const { profileQuery, profiles, isSearching, canAddQueryUser, selectUserById, addFromQuery } =
   useProfilesApi((profile) => {
     selectUserProfile(profile);
+    isUserMenuOpen.value = false;
     isPickerOpen.value = false;
   });
 const placeholderHints = [
@@ -85,13 +88,6 @@ const placeholderHints = [
   'I did transfer to wrong account number, please help me urgently.',
   'Web payment failed but my account was debited.',
   'Please check why my reversal has not dropped since yesterday.'
-] as const;
-const howToSteps = [
-  'Open Select demo user, search your name, then click + Use.',
-  'Type a transaction issue on this screen and press send.',
-  'Continue on chat screen and provide requested transaction details.',
-  'Open Transactions to review all transactions in the system.',
-  'Use + New Transaction on that page to add a record.'
 ] as const;
 const animatedPlaceholder = ref('');
 
@@ -147,8 +143,23 @@ const submitStarter = async (): Promise<void> => {
   }
 };
 
+const toggleUserMenu = (): void => {
+  if (!selectedUser.value) {
+    isPickerOpen.value = true;
+    isUserMenuOpen.value = false;
+    return;
+  }
+  isUserMenuOpen.value = !isUserMenuOpen.value;
+};
+
+const openProfilePickerFromMenu = (): void => {
+  isUserMenuOpen.value = false;
+  isPickerOpen.value = true;
+};
+
 const selectUser = (userId: string): void => {
   selectUserById(userId);
+  isUserMenuOpen.value = false;
   isPickerOpen.value = false;
 };
 
@@ -163,6 +174,7 @@ const avatarLabel = (name: string): string => {
 
 const addUserFromQuery = async (): Promise<void> => {
   await addFromQuery();
+  isUserMenuOpen.value = false;
   isPickerOpen.value = false;
 };
 </script>
