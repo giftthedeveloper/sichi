@@ -12,10 +12,14 @@
         <p>Review all transactions in the system before creating a new one.</p>
       </div>
       <div class="actions">
-        <button type="button" class="new-btn" @click="openCreateTransaction">+ New Transaction</button>
+        <button type="button" class="new-btn" data-tour="transactions-new" @click="openCreateTransaction">
+          + New Transaction
+        </button>
       </div>
     </header>
-    <TransactionTable :rows="transactions.state.rows" />
+    <div data-tour="transactions-table">
+      <TransactionTable :rows="transactions.state.rows" />
+    </div>
     <footer class="pager">
       <button type="button" class="pager-btn" :disabled="page === 1 || isLoading" @click="goPrev">Prev</button>
       <p>Page {{ page }} of {{ transactions.state.totalPages }}</p>

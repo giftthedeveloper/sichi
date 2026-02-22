@@ -8,7 +8,7 @@
     <div class="login-row">
       <button type="button" class="picker-btn" @click="router.push('/transactions')">Transactions</button>
       <div class="user-menu">
-        <button type="button" class="picker-btn user-menu-trigger" @click="toggleUserMenu">
+        <button type="button" class="picker-btn user-menu-trigger" data-tour="dashboard-user-menu" @click="toggleUserMenu">
           {{ selectedUser ? selectedUser.name : 'Select demo user' }}
           <span class="caret" aria-hidden="true">▾</span>
         </button>
@@ -21,7 +21,7 @@
     <form class="input-wrap" @submit.prevent="submitStarter">
       <label class="field">
         <span class="sr-only">Conversation starter</span>
-        <input v-model="draft" type="text" :placeholder="animatedPlaceholder" />
+        <input v-model="draft" data-tour="dashboard-input" type="text" :placeholder="animatedPlaceholder" />
         <button type="submit" class="send-icon" :disabled="isSubmittingIssue" aria-label="Send message">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L21 12L4 4L4 10L15 12L4 14L4 20Z" fill="currentColor" /></svg>
         </button>

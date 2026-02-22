@@ -11,7 +11,9 @@
         <strong>{{ session.activeCase.id }}</strong>
         <span>{{ statusLabel }}</span>
       </div>
-      <button type="button" class="ghost wide" @click="router.push('/transactions')">Transactions</button>
+      <button type="button" class="ghost wide" data-tour="chat-transactions-nav" @click="router.push('/transactions')">
+        Transactions
+      </button>
     </header>
 
     <section v-if="!session.activeCase" class="empty">
@@ -35,7 +37,7 @@
         </template>
       </div>
       <form class="composer" @submit.prevent="submitMessage">
-        <label class="field">
+        <label class="field" data-tour="chat-composer">
           <span class="sr-only">Type message</span>
           <input v-model="draft" type="text" :placeholder="inputPlaceholder" />
           <button type="submit" class="send-icon" :disabled="isSending" aria-label="Send">

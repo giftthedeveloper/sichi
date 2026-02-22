@@ -1,0 +1,108 @@
+.tour-root {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  background: rgb(26 20 29 / 56%);
+  backdrop-filter: blur(2px);
+}
+
+.spotlight {
+  position: fixed;
+  border-radius: 16px;
+  border: 2px solid rgb(255 255 255 / 92%);
+  box-shadow: 0 0 0 9999px rgb(26 20 29 / 36%);
+  pointer-events: none;
+}
+
+.pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 20px;
+  border: 2px solid rgb(250 190 220 / 70%);
+  animation: tour-pulse 1.8s ease-out infinite;
+}
+
+.card {
+  position: fixed;
+  width: min(320px, calc(100vw - 24px));
+  border: 1px solid #ead9e5;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 97%);
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  box-shadow: 0 18px 44px rgb(28 21 32 / 16%);
+}
+
+.step {
+  margin: 0;
+  color: var(--accent-main);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.2;
+}
+
+.body,
+.missing {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.missing {
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.ghost,
+.solid {
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.ghost {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-main);
+}
+
+.ghost:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.solid {
+  border: 0;
+  background: var(--accent-main);
+  color: #fff;
+}
+
+@keyframes tour-pulse {
+  0% {
+    transform: scale(0.98);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1.06);
+    opacity: 0;
+  }
+}
