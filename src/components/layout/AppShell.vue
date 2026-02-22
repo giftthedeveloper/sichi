@@ -1,6 +1,6 @@
 <template>
   <main class="shell">
-    <button type="button" class="global-guide" @click="startTour">Demo Guide</button>
+    <button v-if="showGuideButton" type="button" class="global-guide" @click="startTour">Demo Guide</button>
     <section class="content">
       <slot />
     </section>
@@ -88,6 +88,7 @@ const tourSteps: TourStep[] = [
 ];
 
 const activeStep = computed(() => tourSteps[stepIndex.value] ?? tourSteps[0]);
+const showGuideButton = computed(() => route.path !== '/chat');
 
 const updateSpotlight = async (): Promise<void> => {
   if (!isTourOpen.value) return;

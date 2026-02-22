@@ -7,10 +7,6 @@
     </div>
     <header class="chat-top">
       <button type="button" class="ghost" aria-label="Go back" @click="router.push('/')">←</button>
-      <div v-if="session.activeCase" class="case-pill">
-        <strong>{{ session.activeCase.id }}</strong>
-        <span>{{ statusLabel }}</span>
-      </div>
       <button type="button" class="ghost wide" data-tour="chat-transactions-nav" @click="router.push('/transactions')">
         Transactions
       </button>
@@ -62,12 +58,6 @@ const { state: session, sendMessage, ensureSessionForActiveUser } = useChatSessi
 type ThreadItem =
   | { id: string; kind: 'separator'; label: string }
   | { id: string; kind: 'message'; message: ConversationMessage };
-
-const statusLabel = computed(() => {
-  const status = session.activeCase?.status;
-  if (!status) return '';
-  return status.replaceAll('_', ' ');
-});
 
 const inputPlaceholder = computed(() => {
   const stage = session.activeCase?.detailStage ?? 0;

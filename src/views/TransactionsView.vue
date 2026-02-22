@@ -40,10 +40,6 @@
         </header>
         <form class="modal-form" @submit.prevent="submitNewTransaction">
           <label>
-            Account Number
-            <input v-model="form.accountNumber" type="text" placeholder="e.g. 0123456789" />
-          </label>
-          <label>
             Type
             <select v-model="form.type">
               <option value="bank_transfer">Bank transfer</option>
@@ -97,12 +93,10 @@ const { state: chatState, selectUserProfile } = useChatSession();
 const transactions = useTransactionsMaster();
 const activeProfileName = computed(() => chatState.activeUser?.name ?? '');
 const form = reactive<{
-  accountNumber: string;
   type: MasterTransaction['type'];
   state: MasterTransaction['state'];
   amount: string;
 }>({
-  accountNumber: '',
   type: 'bank_transfer',
   state: 'successful',
   amount: ''
@@ -125,25 +119,24 @@ watch(page, () => {
 });
 
 const submitNewTransaction = async (): Promise<void> => {
-  const digits = form.accountNumber.replaceAll(/\D/g, '');
   if (!activeProfileName.value) {
     isCreateOpen.value = false;
     isProfilePickerOpen.value = true;
     return;
   }
-  if (!form.amount.trim() || digits.length < 4) return;
+  if (!form.amount.trim()) return;
   isLoading.value = true;
   try {
+    const accountLast4 = String(Math.floor(1000 + Math.random() * 9000));
     await transactions.addTransaction({
       profileName: activeProfileName.value,
-      accountLast4: digits.slice(-4),
+      accountLast4,
       type: form.type,
       state: form.state,
       amount: form.amount
     });
     page.value = 1;
     await transactions.loadTransactions(1, pageSize);
-    form.accountNumber = '';
     form.type = 'bank_transfer';
     form.state = 'successful';
     form.amount = '';

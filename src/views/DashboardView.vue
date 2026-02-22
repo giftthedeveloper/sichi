@@ -31,7 +31,7 @@
         </button>
       </label>
     </form>
-    <div v-if="isPickerOpen" class="overlay" @click.self="isPickerOpen = false">
+    <div v-if="isPickerOpen" class="overlay">
       <section class="picker-modal">
         <div class="picker-head">
           <h2>Choose a demo profile</h2>
