@@ -20,7 +20,7 @@
     </section>
 
     <section v-else class="chat-body">
-      <div class="thread">
+      <div ref="threadRef" class="thread">
         <template v-for="item in threadItems" :key="item.id">
           <p v-if="item.kind === 'separator'" class="date-separator">{{ item.label }}</p>
           <article v-else class="bubble" :class="[item.message.sender, { typing: item.message.isTyping }]">
@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useChatSession } from '../composables/useChatSession';
@@ -59,6 +59,7 @@ import type { ConversationMessage } from '../types/chatSession';
 const router = useRouter();
 const draft = ref('');
 const isSending = ref(false);
+const threadRef = ref<{ scrollTop: number; scrollHeight: number } | null>(null);
 const { state: session, sendMessage, ensureSessionForActiveUser } = useChatSession();
 
 type ThreadItem =
@@ -108,6 +109,12 @@ const threadItems = computed<ThreadItem[]>(() => {
   return items;
 });
 
+const scrollThreadToBottom = (): void => {
+  const el = threadRef.value;
+  if (!el) return;
+  el.scrollTop = el.scrollHeight;
+};
+
 const submitMessage = async (): Promise<void> => {
   const text = draft.value.trim();
   if (!text) return;
@@ -124,7 +131,16 @@ onMounted(() => {
   if (!session.activeCase && session.activeUser) {
     void ensureSessionForActiveUser();
   }
+  void nextTick(scrollThreadToBottom);
 });
+
+watch(
+  () => threadItems.value.length,
+  async () => {
+    await nextTick();
+    scrollThreadToBottom();
+  }
+);
 </script>
 
 <style scoped src="./ChatView.css"></style>
