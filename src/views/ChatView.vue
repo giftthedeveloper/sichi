@@ -64,7 +64,7 @@ const inputPlaceholder = computed(() => {
   if (stage === 0) return 'Enter transfer amount';
   if (stage === 1) return 'Enter date and time';
   if (stage === 2) return 'Enter transaction reference';
-  return 'Type a follow-up or request human support';
+  return 'Type a follow-up';
 });
 
 const sameLocalDate = (left: Date, right: Date): boolean =>

@@ -136,14 +136,18 @@ onBeforeUnmount(() => {
 
 const submitStarter = async (): Promise<void> => {
   if (!selectedUser.value || !draft.value.trim()) return;
+  const starter = draft.value.trim();
+  draft.value = '';
   isSubmittingIssue.value = true;
   try {
-    await startCaseFromIssue(draft.value.trim());
-    draft.value = '';
-    router.push('/chat');
-  } finally {
+    await router.push('/chat');
+  } catch {
     isSubmittingIssue.value = false;
+    return;
   }
+  void startCaseFromIssue(starter).finally(() => {
+    isSubmittingIssue.value = false;
+  });
 };
 
 const toggleUserMenu = (): void => {
