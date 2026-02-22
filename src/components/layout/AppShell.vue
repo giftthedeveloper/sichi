@@ -1,7 +1,7 @@
 <template>
   <main class="shell">
     <button v-if="showGuideButton" type="button" class="global-guide" @click="startTour">Demo Guide</button>
-    <button type="button" class="author-link" @click="isAuthorOpen = true">Meet the developer</button>
+    <button v-if="showAuthorLink" type="button" class="author-link" @click="isAuthorOpen = true">Meet the developer</button>
     <section class="content">
       <slot />
     </section>
@@ -93,6 +93,7 @@ const tourSteps: TourStep[] = [
 
 const activeStep = computed(() => tourSteps[stepIndex.value] ?? tourSteps[0]);
 const showGuideButton = computed(() => route.path !== '/chat');
+const showAuthorLink = computed(() => route.path === '/');
 
 const updateSpotlight = async (): Promise<void> => {
   if (!isTourOpen.value) return;
