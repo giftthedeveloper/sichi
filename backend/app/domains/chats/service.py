@@ -6,8 +6,6 @@ from app.domains.chats.intent_service import build_allowed_support_reply, build_
 from app.domains.chats.lookup_service import build_lookup_reply, run_lookup
 from app.domains.chats import repository
 
-HUMAN_TOKENS = ("human", "agent", "person", "staff")
-
 
 def get_or_create_chat(profile_id: str, cursor: Optional[int], limit: int):
     chat = repository.get_or_create_active_chat(profile_id)
@@ -26,30 +24,25 @@ def send_message(chat_id: str, text: str):
     content = text.strip()
     repository.save_message(chat_id, "user", content)
 
-    lowered = content.lower()
-    if any(token in lowered for token in HUMAN_TOKENS):
+    intent = resolve_intent(content)
+    if not intent.is_allowed:
         repository.update_chat_state(chat_id, status="escalated", detail_stage=chat.detail_stage)
-        repository.save_message(chat_id, "bot", "Done. I have moved this chat to human support queue.")
+        try:
+            reply = build_escalation_reply(content)
+        except Exception:
+            reply = "This issue is outside what I can resolve right now. I have escalated it to a human agent."
+        repository.save_message(chat_id, "bot", reply)
     else:
-        intent = resolve_intent(content)
-        if not intent.is_allowed:
-            repository.update_chat_state(chat_id, status="escalated", detail_stage=chat.detail_stage)
+        repository.update_chat_state(chat_id, status="active", detail_stage=chat.detail_stage + 1)
+        try:
+            lookup_result = run_lookup(profile_id=chat.profile_id, user_text=content)
+            reply = build_lookup_reply(content, lookup_result)
+        except Exception:
             try:
-                reply = build_escalation_reply(content)
+                reply = build_allowed_support_reply(content)
             except Exception:
-                reply = "This issue is outside what I can resolve right now. I have escalated it to a human agent."
-            repository.save_message(chat_id, "bot", reply)
-        else:
-            repository.update_chat_state(chat_id, status="active", detail_stage=chat.detail_stage + 1)
-            try:
-                lookup_result = run_lookup(profile_id=chat.profile_id, user_text=content)
-                reply = build_lookup_reply(content, lookup_result)
-            except Exception:
-                try:
-                    reply = build_allowed_support_reply(content)
-                except Exception:
-                    reply = "I am currently unavailable. Please try again shortly or reply with human for escalation."
-            repository.save_message(chat_id, "bot", reply)
+                reply = "I am currently unavailable. Please try again shortly or reply with human for escalation."
+        repository.save_message(chat_id, "bot", reply)
 
     latest_chat = repository.get_chat(chat_id)
     messages, next_cursor, has_more = repository.list_messages(chat_id, cursor=None, limit=20)

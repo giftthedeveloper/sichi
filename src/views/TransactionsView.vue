@@ -6,6 +6,7 @@
       <span class="orb orb-three"></span>
     </div>
     <header class="top">
+      <button type="button" class="ghost nav-back" aria-label="Back to chat" @click="router.push('/chat')">←</button>
       <div class="title-block">
         <h2>Transactions</h2>
         <p>Review all transactions in the system before creating a new one.</p>
@@ -73,6 +74,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import ProfilePickerModal from '../components/common/ProfilePickerModal.vue';
 import TransactionTable from '../components/transactions/TransactionTable.vue';
@@ -81,6 +83,7 @@ import type { DemoProfile } from '../types/chatSession';
 import { useTransactionsMaster } from '../composables/useTransactionsMaster';
 import type { MasterTransaction } from '../types/transactionsMaster';
 
+const router = useRouter();
 const isCreateOpen = ref(false);
 const isProfilePickerOpen = ref(false);
 const isLoading = ref(false);
