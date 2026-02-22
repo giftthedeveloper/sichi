@@ -8,9 +8,8 @@ DEFAULT_ALLOWED_CATEGORIES = {
     "card_debit_dispute",
     "bill_payment_issue",
     "reversal_request",
-    "loan_request",
-    "account_opening",
-    "other",
+    "account_balance_inquiry",
+    "transaction_status_check",
 }
 
 DEFAULT_ALL_CATEGORIES = [
@@ -18,9 +17,14 @@ DEFAULT_ALL_CATEGORIES = [
     "card_debit_dispute",
     "bill_payment_issue",
     "reversal_request",
-    "loan_request",
-    "account_opening",
-    "other",
+    "account_balance_inquiry",
+    "transaction_status_check",
+    "greeting",
+    "clarification",
+    "generic_help_request",
+    "non_banking_request",
+    "emotional_support_request",
+    "companion_request",
 ]
 
 
@@ -54,3 +58,17 @@ def get_all_categories() -> list[str]:
     if configured:
         return sorted(configured)
     return list(DEFAULT_ALL_CATEGORIES)
+
+
+def get_neutral_categories() -> Set[str]:
+    configured = _parse_csv_env("NEUTRAL_CATEGORIES")
+    if configured:
+        return configured
+    return {"greeting", "clarification", "generic_help_request"}
+
+
+def get_out_of_scope_categories() -> Set[str]:
+    configured = _parse_csv_env("OUT_OF_SCOPE_CATEGORIES")
+    if configured:
+        return configured
+    return {"non_banking_request", "emotional_support_request", "companion_request"}

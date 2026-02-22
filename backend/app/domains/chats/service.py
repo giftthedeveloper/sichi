@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from typing import Optional
 
-from app.domains.chats.intent_service import build_allowed_support_reply, build_escalation_reply, resolve_intent
+from app.domains.chats.intent_service import (
+    build_allowed_support_reply,
+    build_neutral_redirect_reply,
+    build_out_of_scope_reply,
+    resolve_intent,
+)
 from app.domains.chats.lookup_service import build_lookup_reply, run_lookup
 from app.domains.chats import repository
 
@@ -25,14 +30,7 @@ def send_message(chat_id: str, text: str):
     repository.save_message(chat_id, "user", content)
 
     intent = resolve_intent(content)
-    if not intent.is_allowed:
-        repository.update_chat_state(chat_id, status="escalated", detail_stage=chat.detail_stage)
-        try:
-            reply = build_escalation_reply(content)
-        except Exception:
-            reply = "This issue is outside what I can resolve right now. I have escalated it to a human agent."
-        repository.save_message(chat_id, "bot", reply)
-    else:
+    if intent.route == "allowed":
         repository.update_chat_state(chat_id, status="active", detail_stage=chat.detail_stage + 1)
         try:
             lookup_result = run_lookup(profile_id=chat.profile_id, user_text=content)
@@ -42,6 +40,20 @@ def send_message(chat_id: str, text: str):
                 reply = build_allowed_support_reply(content)
             except Exception:
                 reply = "I am currently unavailable. Please try again shortly or reply with human for escalation."
+        repository.save_message(chat_id, "bot", reply)
+    elif intent.route == "neutral":
+        repository.update_chat_state(chat_id, status="active", detail_stage=chat.detail_stage)
+        try:
+            reply = build_neutral_redirect_reply(content)
+        except Exception:
+            reply = "I am currently unavailable. Please try again shortly."
+        repository.save_message(chat_id, "bot", reply)
+    else:
+        repository.update_chat_state(chat_id, status="active", detail_stage=chat.detail_stage)
+        try:
+            reply = build_out_of_scope_reply(content)
+        except Exception:
+            reply = "I am currently unavailable. Please try again shortly."
         repository.save_message(chat_id, "bot", reply)
 
     latest_chat = repository.get_chat(chat_id)
