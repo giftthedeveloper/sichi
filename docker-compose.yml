@@ -1,0 +1,28 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: sichi-backend
+    ports:
+      - "18000:8000"
+    environment:
+      OLLAMA_URL: http://host.docker.internal:11434/api/chat
+      OLLAMA_MODEL: mistral
+      CORS_ALLOWED_ORIGINS: http://localhost:15173,http://127.0.0.1:15173
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: http://localhost:18000
+    container_name: sichi-frontend
+    depends_on:
+      - backend
+    ports:
+      - "15173:80"
+    restart: unless-stopped
